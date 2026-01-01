@@ -1,12 +1,5 @@
-/**
- * This code is responsible for partition management, allowing users to
- * add, resize, and remove partitions on the selected disk.
- */
+#include "../../all.h"
 
-#include "../all.h"
-
-#define PARTITION_STEP_NUM 3
-#define MAX_VISIBLE_PARTITIONS 3
 #define SIZE_COUNT 17
 #define MOUNT_COUNT 5
 #define FLAG_COUNT 3
@@ -37,140 +30,16 @@ static const unsigned long long size_presets[] =
     2000ULL * 1000000000,    // 2T
     0                        // "Rest"
 };
+
 static const char *size_labels[] =
 {
     "64M", "128M", "256M", "512M", "1G", "2G", "4G", "8G",
     "16G", "32G", "64G", "128G", "256G", "512G", "1T", "2T", "Rest"
 };
+
 static const char *mount_options[] = { "/", "/boot", "/home", "/var", "swap" };
 static const char *flag_options[] = { "none", "boot", "esp" };
 static const char *fs_options[] = { "ext4", "swap" };
-
-static const char *fs_to_string(PartitionFS fs)
-{
-    switch (fs)
-    {
-        case FS_EXT4: return "ext4";
-        case FS_SWAP: return "swap";
-        default: return "?";
-    }
-}
-
-static const char *type_to_string(PartitionType type)
-{
-    switch (type)
-    {
-        case PART_PRIMARY: return "primary";
-        case PART_LOGICAL: return "logical";
-        default: return "?";
-    }
-}
-
-static void render_partition_table(
-    WINDOW *modal, Store *store, unsigned long long disk_size,
-    int selected_partition, int in_partition_select_mode,
-    int scroll_offset
-)
-{
-    char size_str[32];
-    char disk_size_str[32];
-    char free_str[32];
-
-    // Format disk size and free space strings.
-    format_disk_size(disk_size, disk_size_str, sizeof(disk_size_str));
-    unsigned long long used = sum_partition_sizes(
-        store->partitions, store->partition_count
-    );
-    unsigned long long free_space = (disk_size > used) ? disk_size - used : 0;
-    format_disk_size(free_space, free_str, sizeof(free_str));
-
-    // Display header with disk info and free space.
-    mvwprintw(
-        modal,
-        4, 3,
-        "%s (%s, %s free)",
-        store->disk, disk_size_str, free_str
-    );
-
-    // Calculate the table width, reducing by 1 if scrollbar is needed.
-    int table_width = MODAL_WIDTH - 6;
-    if (store->partition_count > MAX_VISIBLE_PARTITIONS)
-    {
-        table_width--;
-    }
-
-    // Render column headers with darker background.
-    wattron(modal, COLOR_PAIR(4));
-    char header[64];
-    snprintf(
-        header, sizeof(header),
-        " #  %-10s %-8s %-5s %-8s %-6s",
-        "Size", "Mount", "FS", "Type", "Flags"
-    );
-    mvwprintw(modal, 6, 3, "%-*s", table_width, header);
-    wattroff(modal, COLOR_PAIR(4));
-
-    // Render partition rows.
-    for (int i = 0; i < MAX_VISIBLE_PARTITIONS; i++)
-    {
-        int part_index = scroll_offset + i;
-
-        // Apply alternating row background color.
-        int row_color = (part_index % 2 == 0) ? 2 : 5;
-        wattron(modal, COLOR_PAIR(row_color));
-
-        if (part_index < store->partition_count)
-        {
-            // Format partition data for display.
-            Partition *p = &store->partitions[part_index];
-            format_disk_size(p->size_bytes, size_str, sizeof(size_str));
-
-            // Build flags string from partition flags.
-            char flags[16] = "";
-            if (p->flag_boot) strcat(flags, "boot ");
-            if (p->flag_esp) strcat(flags, "esp");
-
-            // Use "[swap]" label for swap partitions.
-            const char *mount = (p->filesystem == FS_SWAP)
-                ? "[swap]" : p->mount_point;
-
-            // Highlight selected partition in selection mode.
-            if (in_partition_select_mode && part_index == selected_partition)
-            {
-                wattron(modal, A_REVERSE);
-            }
-
-            // Render the partition row.
-            char row[64];
-            snprintf(
-                row, sizeof(row),
-                " %-2d %-10s %-8s %-5s %-8s %-6s",
-                part_index + 1, size_str, mount,
-                fs_to_string(p->filesystem),
-                type_to_string(p->type), flags
-            );
-            mvwprintw(modal, 7 + i, 3, "%-*s", table_width, row);
-
-            // Remove highlight after rendering.
-            if (in_partition_select_mode && part_index == selected_partition)
-            {
-                wattroff(modal, A_REVERSE);
-            }
-        }
-        else
-        {
-            // Render empty row for unused table slots.
-            mvwprintw(modal, 7 + i, 3, "%-*s", table_width, "");
-        }
-
-        wattroff(modal, COLOR_PAIR(row_color));
-    }
-
-    // Draw scrollbar if there are more partitions than visible rows.
-    render_scrollbar(modal, MODAL_TABLE_START_Y, MODAL_WIDTH - 3,
-                     MAX_VISIBLE_PARTITIONS, scroll_offset,
-                     MAX_VISIBLE_PARTITIONS, store->partition_count);
-}
 
 static int find_closest_size_idx(unsigned long long size)
 {
@@ -228,19 +97,6 @@ static int find_flag_idx(int boot, int esp)
     return 0;
 }
 
-/**
- * Runs the partition form dialog for adding or editing a partition.
- *
- * @param modal       The modal window.
- * @param title       The dialog title.
- * @param free_str    Free space string to display.
- * @param size_idx    Pointer to size index (in/out).
- * @param mount_idx   Pointer to mount index (in/out).
- * @param flag_idx    Pointer to flag index (in/out).
- * @param footer_action The action label for footer (e.g., "Add" or "Save").
- *
- * @return 1 if user submitted, 0 if cancelled.
- */
 static int run_partition_form(
     WINDOW *modal, const char *title, const char *free_str,
     int *size_idx, int *mount_idx, int *flag_idx,
@@ -304,16 +160,6 @@ static int run_partition_form(
     }
 }
 
-/**
- * Displays a partition selection dialog.
- *
- * @param modal     The modal window.
- * @param store     The global store.
- * @param disk_size The total disk size in bytes.
- * @param title     The dialog title.
- *
- * @return Selected partition index (0-based), or -1 if cancelled.
- */
 static int select_partition(
     WINDOW *modal, Store *store, unsigned long long disk_size, const char *title
 )
@@ -336,7 +182,7 @@ static int select_partition(
         );
 
         // Render footer and refresh display.
-        const char *footer[] = 
+        const char *footer[] =
         {
             "[Up][Down] Navigate", "[Enter] Select", "[Esc] Cancel", NULL
         };
@@ -376,7 +222,7 @@ static int select_partition(
     }
 }
 
-static int add_partition_dialog(
+int add_partition_dialog(
     WINDOW *modal, Store *store, unsigned long long disk_size
 )
 {
@@ -428,16 +274,14 @@ static int add_partition_dialog(
     // Set mount point and filesystem based on selection.
     if (mount_idx == 4)
     {
-        snprintf(new_partition.mount_point, sizeof(new_partition.mount_point), "[swap]");
+        snprintf(new_partition.mount_point, sizeof(new_partition.mount_point),
+                 "[swap]");
         new_partition.filesystem = FS_SWAP;
     }
     else
     {
-        snprintf(
-            new_partition.mount_point, sizeof(new_partition.mount_point),
-            "%s",
-            mount_options[mount_idx]
-        );
+        snprintf(new_partition.mount_point, sizeof(new_partition.mount_point),
+                 "%s", mount_options[mount_idx]);
         new_partition.filesystem = FS_EXT4;
     }
 
@@ -451,7 +295,7 @@ static int add_partition_dialog(
     return 1;
 }
 
-static int edit_partition_dialog(
+int edit_partition_dialog(
     WINDOW *modal, Store *store, unsigned long long disk_size
 )
 {
@@ -533,7 +377,7 @@ static int edit_partition_dialog(
     return 1;
 }
 
-static int remove_partition_dialog(
+int remove_partition_dialog(
     WINDOW *modal, Store *store, unsigned long long disk_size
 )
 {
@@ -560,133 +404,4 @@ static int remove_partition_dialog(
     store->partition_count--;
 
     return 1;
-}
-
-int run_partition_step(WINDOW *modal)
-{
-    // Get store and disk size for partition operations.
-    Store *store = get_store();
-    unsigned long long disk_size = get_disk_size(store->disk);
-
-    // Define available actions for the partition step.
-    StepOption actions[] = {
-        {"add", "Add"},
-        {"edit", "Edit"},
-        {"remove", "Remove"},
-        {"done", "Done"}
-    };
-    int action_count = 4;
-    int action_selected = 0;
-    int scroll_offset = 0;
-
-    // Main partition step loop.
-    while (1)
-    {
-        // Adjust scroll offset if partitions were removed.
-        if (scroll_offset > 0 && scroll_offset >= store->partition_count)
-        {
-            if (store->partition_count > 0)
-            {
-                scroll_offset = store->partition_count - 1;
-            }
-            else
-            {
-                scroll_offset = 0;
-            }
-        }
-
-        // Calculate maximum scroll offset.
-        int max_scroll = 0;
-        if (store->partition_count > MAX_VISIBLE_PARTITIONS)
-        {
-            max_scroll = store->partition_count - MAX_VISIBLE_PARTITIONS;
-        }
-        if (scroll_offset > max_scroll)
-        {
-            scroll_offset = max_scroll;
-        }
-
-        // Clear modal and render step header.
-        clear_modal(modal);
-        wattron(modal, A_BOLD);
-        mvwprintw(modal, 2, 3, "Step %d: Partitioning", PARTITION_STEP_NUM);
-        wattroff(modal, A_BOLD);
-
-        // Render the partition table.
-        render_partition_table(modal, store, disk_size, -1, 0, scroll_offset);
-
-        // Render action menu above footer.
-        int action_y = MODAL_HEIGHT - 4;
-        int x = 3;
-        for (int i = 0; i < action_count; i++)
-        {
-            // Highlight selected action.
-            if (i == action_selected)
-            {
-                wattron(modal, A_REVERSE);
-            }
-            mvwprintw(modal, action_y, x, " %s ", actions[i].label);
-            if (i == action_selected)
-            {
-                wattroff(modal, A_REVERSE);
-            }
-            x += strlen(actions[i].label) + 3;
-        }
-
-        // Render footer and refresh display.
-        const char *footer[] = {
-            "[Arrows] Navigate", "[Enter] Confirm", "[Esc] Back", NULL
-        };
-        render_footer(modal, footer);
-        wrefresh(modal);
-
-        // Handle user input.
-        int key = wgetch(modal);
-        switch (key)
-        {
-            case KEY_UP:
-                // Scroll partition table up.
-                if (scroll_offset > 0) scroll_offset--;
-                break;
-
-            case KEY_DOWN:
-                // Scroll partition table down.
-                if (scroll_offset < max_scroll) scroll_offset++;
-                break;
-
-            case KEY_LEFT:
-                // Move action selection left.
-                if (action_selected > 0) action_selected--;
-                break;
-
-            case KEY_RIGHT:
-                // Move action selection right.
-                if (action_selected < action_count - 1) action_selected++;
-                break;
-
-            case '\n':
-                // Execute selected action.
-                if (strcmp(actions[action_selected].value, "add") == 0)
-                {
-                    add_partition_dialog(modal, store, disk_size);
-                }
-                else if (strcmp(actions[action_selected].value, "edit") == 0)
-                {
-                    edit_partition_dialog(modal, store, disk_size);
-                }
-                else if (strcmp(actions[action_selected].value, "remove") == 0)
-                {
-                    remove_partition_dialog(modal, store, disk_size);
-                }
-                else if (strcmp(actions[action_selected].value, "done") == 0)
-                {
-                    return 1;
-                }
-                break;
-
-            case 27:
-                // User pressed Escape, go back to previous step.
-                return 0;
-        }
-    }
 }

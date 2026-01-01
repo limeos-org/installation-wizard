@@ -1,5 +1,5 @@
 #pragma once
-#include "../all.h"
+#include "../../all.h"
 
 /**
  * Runs the partition management step interactively.
