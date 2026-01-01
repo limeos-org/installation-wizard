@@ -36,6 +36,7 @@ typedef struct {
     int option_count;
     int current;
     int readonly;
+    const char *description;
 } FormField;
 
 /**

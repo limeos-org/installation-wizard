@@ -239,7 +239,7 @@ void render_form(
     // Render each field.
     for (int field_index = 0; field_index < field_count; field_index++)
     {
-        int row_y = y + (field_index * 2);
+        int row_y = y + field_index;
         int is_focused = (field_index == focused);
 
         // Render label.
@@ -278,6 +278,33 @@ void render_form(
         if (is_focused && !fields[field_index].readonly)
         {
             wattroff(window, A_REVERSE);
+        }
+    }
+
+    // Render description for focused field below all fields.
+    if (focused >= 0 && focused < field_count &&
+        fields[focused].description != NULL)
+    {
+        int desc_y = y + field_count + 1;
+        const char *desc = fields[focused].description;
+        const char *line_start = desc;
+        int line_num = 0;
+
+        while (*line_start)
+        {
+            const char *line_end = strchr(line_start, '\n');
+            if (line_end)
+            {
+                int len = line_end - line_start;
+                print_dim(window, desc_y + line_num, x, "%.*s", len, line_start);
+                line_start = line_end + 1;
+            }
+            else
+            {
+                print_dim(window, desc_y + line_num, x, "%s", line_start);
+                break;
+            }
+            line_num++;
         }
     }
 }

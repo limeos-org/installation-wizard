@@ -4,11 +4,13 @@
 #define MOUNT_COUNT 5
 #define FLAG_COUNT 3
 #define FS_COUNT 2
+#define TYPE_COUNT 2
 #define FIELD_SIZE   0
 #define FIELD_MOUNT  1
 #define FIELD_FS     2
-#define FIELD_FLAGS  3
-#define FIELD_COUNT  4
+#define FIELD_TYPE   3
+#define FIELD_FLAGS  4
+#define FIELD_COUNT  5
 
 static const unsigned long long size_presets[] =
 {
@@ -40,6 +42,7 @@ static const char *size_labels[] =
 static const char *mount_options[] = { "/", "/boot", "/home", "/var", "swap" };
 static const char *flag_options[] = { "none", "boot", "esp" };
 static const char *fs_options[] = { "ext4", "swap" };
+static const char *type_options[] = { "primary", "logical" };
 
 static int find_closest_size_idx(unsigned long long size)
 {
@@ -99,7 +102,7 @@ static int find_flag_idx(int boot, int esp)
 
 static int run_partition_form(
     WINDOW *modal, const char *title, const char *free_str,
-    int *size_idx, int *mount_idx, int *flag_idx,
+    int *size_idx, int *mount_idx, int *type_idx, int *flag_idx,
     const char *footer_action
 )
 {
@@ -113,10 +116,21 @@ static int run_partition_form(
 
         // Set up form fields.
         FormField fields[FIELD_COUNT] = {
-            { "Size",       size_labels,  SIZE_COUNT,  *size_idx,  0 },
-            { "Mount",      mount_options, MOUNT_COUNT, *mount_idx, 0 },
-            { "Filesystem", fs_options,   FS_COUNT,    fs_idx,     1 },
-            { "Flags",      flag_options, FLAG_COUNT,  *flag_idx,  0 }
+            { "Size",       size_labels,   SIZE_COUNT,  *size_idx,  0,
+              "The size you want this partition to be.\n"
+              "Use 'Rest' to allocate all remaining disk space." },
+            { "Mount",      mount_options, MOUNT_COUNT, *mount_idx, 0,
+              "Directory where this partition will be accessible.\n"
+              "At minimum, a root (/) partition is required." },
+            { "Filesystem", fs_options,    FS_COUNT,    fs_idx,     1,
+              "Filesystem format for this partition.\n"
+              "Automatically selected based on the mount point." },
+            { "Type",       type_options,  TYPE_COUNT,  *type_idx,  0,
+              "GPT partition type. Primary is standard for most uses.\n"
+              "Logical partitions are used within extended partitions." },
+            { "Flags",      flag_options,  FLAG_COUNT,  *flag_idx,  0,
+              "Special partition flags for bootloader configuration.\n"
+              "Use 'esp' for UEFI boot, 'boot' for legacy BIOS boot." }
         };
 
         // Clear modal and render dialog title.
@@ -147,6 +161,7 @@ static int run_partition_form(
         // Update indices from form fields after key handling.
         *size_idx = fields[FIELD_SIZE].current;
         *mount_idx = fields[FIELD_MOUNT].current;
+        *type_idx = fields[FIELD_TYPE].current;
         *flag_idx = fields[FIELD_FLAGS].current;
 
         if (result == FORM_SUBMIT)
@@ -242,12 +257,13 @@ int add_partition_dialog(
     // Initialize form field indices with defaults.
     int size_idx = 6;      // Default to 4G.
     int mount_idx = 0;     // Default to /.
+    int type_idx = 0;      // Default to primary.
     int flag_idx = 0;      // Default to none.
 
     // Run the partition form.
     if (!run_partition_form(
         modal, "Add Partition", free_str, &size_idx,
-        &mount_idx, &flag_idx, "Add"
+        &mount_idx, &type_idx, &flag_idx, "Add"
     ))
     {
         return 0;
@@ -286,7 +302,7 @@ int add_partition_dialog(
     }
 
     // Set partition type and flags.
-    new_partition.type = PART_PRIMARY;
+    new_partition.type = (type_idx == 0) ? PART_PRIMARY : PART_LOGICAL;
     new_partition.flag_boot = (flag_idx == 1);
     new_partition.flag_esp = (flag_idx == 2);
 
@@ -328,6 +344,7 @@ int edit_partition_dialog(
     // Initialize form fields from current partition values.
     int size_idx = find_closest_size_idx(p->size_bytes);
     int mount_idx = find_mount_idx(p->mount_point);
+    int type_idx = (p->type == PART_PRIMARY) ? 0 : 1;
     int flag_idx = find_flag_idx(p->flag_boot, p->flag_esp);
 
     // Build title with partition number.
@@ -336,7 +353,7 @@ int edit_partition_dialog(
 
     // Run the partition form.
     if (!run_partition_form(
-        modal, title, free_str, &size_idx, &mount_idx, &flag_idx, "Save"
+        modal, title, free_str, &size_idx, &mount_idx, &type_idx, &flag_idx, "Save"
     ))
     {
         return 0;
@@ -371,7 +388,8 @@ int edit_partition_dialog(
         p->filesystem = FS_EXT4;
     }
 
-    // Update partition flags.
+    // Update partition type and flags.
+    p->type = (type_idx == 0) ? PART_PRIMARY : PART_LOGICAL;
     p->flag_boot = (flag_idx == 1);
     p->flag_esp = (flag_idx == 2);
     return 1;
