@@ -126,8 +126,8 @@ static int run_partition_form(
               "Filesystem format for this partition.\n"
               "Automatically selected based on the mount point." },
             { "Type",       type_options,  TYPE_COUNT,  *type_idx,  0,
-              "GPT partition type. Primary is standard for most uses.\n"
-              "Logical partitions are used within extended partitions." },
+              "Partition type. Primary is standard for most uses.\n"
+              "Use logical partitions inside extended partitions." },
             { "Flags",      flag_options,  FLAG_COUNT,  *flag_idx,  0,
               "Special partition flags for bootloader configuration.\n"
               "Use 'esp' for UEFI boot, 'boot' for legacy BIOS boot." }
