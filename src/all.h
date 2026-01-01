@@ -14,6 +14,7 @@
 
 #include "store/store.h"
 #include "utils/disk.h"
+#include "utils/command.h"
 #include "ui/ui.h"
 #include "ui/modal.h"
 #include "ui/interfaces.h"
@@ -25,3 +26,7 @@
 #include "steps/partition/partition.h"
 #include "steps/confirm.h"
 #include "install/install.h"
+#include "install/partitions.h"
+#include "install/rootfs.h"
+#include "install/bootloader.h"
+#include "install/locale.h"
