@@ -27,12 +27,5 @@ int extract_rootfs(void)
         return 1;
     }
 
-    // Mount the boot partition.
-    snprintf(cmd, sizeof(cmd), "mount %s /mnt/boot 2>/dev/null", store->disk);
-    if (run_cmd(cmd) != 0)
-    {
-        return 1;
-    }
-
     return 0;
 }
