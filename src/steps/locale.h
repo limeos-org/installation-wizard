@@ -1,21 +1,21 @@
 #pragma once
-#include "./all.h"
+#include "../all.h"
 
 /**
- * Detects available system locales and populates the options array.
+ * Populates the options array with available system locales.
  *
- * @param options Array to store detected locales.
- * @param max_count Maximum number of options to detect.
+ * @param out_options Array to store locale options.
+ * @param max_count Maximum number of options to populate.
  *
- * @return Number of locales detected.
+ * @return Number of options populated.
  */
-int detect_locales(StepOption *options, int max_count);
+int populate_locale_options(StepOption *out_options, int max_count);
 
 /**
  * Runs the locale selection step interactively.
- * 
+ *
  * @param modal The modal window to draw in.
- * 
- * @return 1 if user confirmed selection, 0 if user quit.
+ *
+ * @return 1 if user confirmed selection, 0 if user went back.
  */
 int run_locale_step(WINDOW *modal);

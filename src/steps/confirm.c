@@ -12,7 +12,7 @@ int run_confirmation_step(WINDOW *modal)
     // Clear and draw step header.
     clear_modal(modal);
     wattron(modal, A_BOLD | COLOR_PAIR(1));
-    mvwprintw(modal, 2, 3, "Step 3: Confirm Installation");
+    mvwprintw(modal, 2, 3, "Step 4: Confirm Installation");
     wattroff(modal, A_BOLD);
 
     // Display summary of selected options.
@@ -20,19 +20,40 @@ int run_confirmation_step(WINDOW *modal)
     mvwprintw(modal, 6, 3, "  Locale: %s", store->locale);
     mvwprintw(modal, 7, 3, "  Disk:   %s", store->disk);
 
+    // Display partition summary.
+    unsigned long long disk_size = get_disk_size(store->disk);
+    unsigned long long used = sum_partition_sizes(store->partitions, store->partition_count);
+    unsigned long long free_space = (disk_size > used) ? disk_size - used : 0;
+    char free_str[32];
+    format_disk_size(free_space, free_str, sizeof(free_str));
+    if (store->partition_count > 0)
+    {
+        mvwprintw(
+            modal,                                      // Modal window.
+            8,                                          // Line number.
+            3,                                          // Column number.
+            "  Partitions: %d partitions, %s left",     // Format string.
+            store->partition_count,
+            free_str
+        );
+    }
+    else
+    {
+        mvwprintw(modal, 8, 3, "  Partitions: (none)");
+    }
+
     // Display warning about disk formatting.
-    wattron(modal, A_BOLD);
-    mvwprintw(modal, 9, 3, "WARNING: All data on %s will be erased!", store->disk);
-    wattroff(modal, A_BOLD);
+    print_warning(modal, 10, 3, "WARNING: All data on %s will be erased!", store->disk);
 
     // Display navigation footer.
-    mvwprintw(modal, MODAL_HEIGHT - 2, 3,
-              "Press Enter to install, or 'q' to quit.");
+    const char *footer[] = {"[Enter] Install", "[Esc] Back", NULL};
+    render_footer(modal, footer);
     wrefresh(modal);
 
-    // Wait for user confirmation or quit.
+    // Wait for user confirmation or back.
     int key;
-    while ((key = wgetch(modal)) != '\n' && key != 'q') {
+    while ((key = wgetch(modal)) != '\n' && key != 27)
+    {
         // Ignore other input.
     }
 

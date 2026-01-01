@@ -34,8 +34,8 @@ WINDOW *create_modal(const char *title)
 void clear_modal(WINDOW *modal)
 {
     // Clear content area with spaces, preserving the border.
-    for (int y = 1; y < MODAL_HEIGHT - 1; y++) {
-        mvwprintw(modal, y, 1, "%*s", MODAL_WIDTH - 2, "");
+    for (int row = 1; row < MODAL_HEIGHT - 1; row++) {
+        mvwprintw(modal, row, 1, "%*s", MODAL_WIDTH - 2, "");
     }
 }
 

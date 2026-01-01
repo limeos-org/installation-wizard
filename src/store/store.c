@@ -8,7 +8,9 @@
 static Store store = {
     .current_step = 0,
     .locale = "",
-    .disk = ""
+    .disk = "",
+    .partitions = {{0}},
+    .partition_count = 0
 };
 
 Store *get_store(void)
@@ -21,4 +23,6 @@ void reset_store(void)
     store.current_step = 0;
     store.locale[0] = '\0';
     store.disk[0] = '\0';
+    memset(store.partitions, 0, sizeof(store.partitions));
+    store.partition_count = 0;
 }

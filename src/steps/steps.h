@@ -1,5 +1,10 @@
 #pragma once
-#include "./all.h"
+#include "../all.h"
+
+/**
+ * Maximum number of options in a selection list.
+ */
+#define STEPS_MAX_OPTIONS 32
 
 /**
  * Represents a single installation step.
@@ -18,11 +23,6 @@ typedef struct {
     char value[128];
     char label[256];
 } StepOption;
-
-/**
- * Maximum number of options in a selection list.
- */
-#define STEPS_MAX_OPTIONS 32
 
 /**
  * Displays a step in the modal window.
@@ -53,8 +53,9 @@ int await_step_input(WINDOW *modal);
  * @param scroll_offset Index of the first visible option.
  * @param max_visible Maximum number of options to display at once.
  */
-void render_step_options(WINDOW *modal, StepOption *options, int count, int selected,
-                         int start_y, int scroll_offset, int max_visible);
+void render_step_options(WINDOW *modal, StepOption *options, int count,
+                         int selected, int start_y, int scroll_offset,
+                         int max_visible);
 
 /**
  * Runs an interactive selection step, returning the selected index.
@@ -65,9 +66,11 @@ void render_step_options(WINDOW *modal, StepOption *options, int count, int sele
  * @param description Text shown above the options.
  * @param options Array of options to choose from.
  * @param count Number of options in the array.
- * @param selected Pointer to store the selected index, also used as initial selection.
+ * @param out_selected Pointer to store selected index, also used as initial.
+ * @param allow_back Whether to allow the back option (Escape key).
  *
- * @return 1 if user confirmed selection, 0 if user quit.
+ * @return 1 if user confirmed selection, 0 if user went back.
  */
 int run_selection_step(WINDOW *modal, const char *title, int step_number,
-                       const char *description, StepOption *options, int count, int *selected);
+                       const char *description, StepOption *options, int count,
+                       int *out_selected, int allow_back);

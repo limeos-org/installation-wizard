@@ -5,53 +5,20 @@
 
 #include "../all.h"
 
-static void format_size(unsigned long long bytes, char *buffer, size_t buffer_size)
-{
-    double size = (double)bytes;
-
-    if (size >= 1e12) {
-        snprintf(buffer, buffer_size, "%.1f TB", size / 1e12);
-    } else if (size >= 1e9) {
-        snprintf(buffer, buffer_size, "%.1f GB", size / 1e9);
-    } else if (size >= 1e6) {
-        snprintf(buffer, buffer_size, "%.1f MB", size / 1e6);
-    } else {
-        snprintf(buffer, buffer_size, "%llu B", bytes);
-    }
-}
-
-static unsigned long long get_disk_size(const char *device)
-{
-    char path[256];
-    snprintf(path, sizeof(path), "/sys/block/%s/size", device);
-
-    FILE *file = fopen(path, "r");
-    if (file == NULL) {
-        return 0;
-    }
-
-    unsigned long long sectors = 0;
-    if (fscanf(file, "%llu", &sectors) != 1) {
-        sectors = 0;
-    }
-    fclose(file);
-
-    // Sector size is typically 512 bytes.
-    return sectors * 512;
-}
-
 static int is_removable(const char *device)
 {
     char path[256];
     snprintf(path, sizeof(path), "/sys/block/%s/removable", device);
 
     FILE *file = fopen(path, "r");
-    if (file == NULL) {
+    if (file == NULL)
+    {
         return 0;
     }
 
     int removable = 0;
-    if (fscanf(file, "%d", &removable) != 1) {
+    if (fscanf(file, "%d", &removable) != 1)
+    {
         removable = 0;
     }
     fclose(file);
@@ -59,20 +26,23 @@ static int is_removable(const char *device)
     return removable;
 }
 
-int detect_disks(StepOption *options, int max_count)
+int populate_disk_options(StepOption *out_options, int max_count)
 {
+    // Open `/sys/block` to read block devices.
     DIR *dir = opendir("/sys/block");
-    if (dir == NULL) {
+    if (dir == NULL)
+    {
         // Fallback if `/sys/block` is unavailable.
-        snprintf(options[0].value, sizeof(options[0].value), "/dev/sda");
-        snprintf(options[0].label, sizeof(options[0].label), "/dev/sda (Unknown size)");
+        snprintf(out_options[0].value, sizeof(out_options[0].value), "/dev/sda");
+        snprintf(out_options[0].label, sizeof(out_options[0].label), "/dev/sda (Unknown size)");
         return 1;
     }
 
+    // Iterate over block devices in `/sys/block`.
     int count = 0;
     struct dirent *entry;
-
-    while ((entry = readdir(dir)) != NULL && count < max_count) {
+    while ((entry = readdir(dir)) != NULL && count < max_count)
+    {
         const char *name = entry->d_name;
 
         // Skip virtual and special devices.
@@ -82,34 +52,44 @@ int detect_disks(StepOption *options, int max_count)
             strncmp(name, "sr", 2) == 0 ||
             strncmp(name, "fd", 2) == 0 ||
             strcmp(name, ".") == 0 ||
-            strcmp(name, "..") == 0) {
+            strcmp(name, "..") == 0)
+        {
             continue;
         }
 
         // Get disk size and format label.
         unsigned long long size = get_disk_size(name);
-        if (size == 0) {
+        if (size == 0)
+        {
             continue;
         }
 
+        // Format size string.
         char size_str[32];
-        format_size(size, size_str, sizeof(size_str));
+        format_disk_size(size, size_str, sizeof(size_str));
 
         // Mark removable disks in the label.
         const char *removable_tag = is_removable(name) ? " [Removable]" : "";
 
-        snprintf(options[count].value, sizeof(options[count].value), "/dev/%s", name);
-        snprintf(options[count].label, sizeof(options[count].label),
-                 "/dev/%s - %s%s", name, size_str, removable_tag);
+        // Populate option entry.
+        snprintf(out_options[count].value, sizeof(out_options[count].value), "/dev/%s", name);
+        snprintf(
+            out_options[count].label,
+            sizeof(out_options[count].label),
+            "/dev/%s - %s%s",
+            name, size_str, removable_tag
+        );
         count++;
     }
 
+    // Close the directory previously opened for reading block devices.
     closedir(dir);
 
     // Ensure at least one fallback option exists.
-    if (count == 0) {
-        snprintf(options[0].value, sizeof(options[0].value), "/dev/sda");
-        snprintf(options[0].label, sizeof(options[0].label), "/dev/sda (No disks detected)");
+    if (count == 0)
+    {
+        snprintf(out_options[0].value, sizeof(out_options[0].value), "/dev/sda");
+        snprintf(out_options[0].label, sizeof(out_options[0].label), "/dev/sda (No disks detected)");
         return 1;
     }
 
@@ -118,17 +98,46 @@ int detect_disks(StepOption *options, int max_count)
 
 int run_disk_step(WINDOW *modal)
 {
+    Store *store = get_store();
     StepOption options[STEPS_MAX_OPTIONS];
-    int count = detect_disks(options, STEPS_MAX_OPTIONS);
+
+    // Populate options with available disks.
+    int count = populate_disk_options(options, STEPS_MAX_OPTIONS);
+
+    // Mark previously selected disk if any.
     int selected = 0;
+    if (store->disk[0] != '\0')
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (strcmp(options[i].value, store->disk) == 0)
+            {
+                selected = i;
+                // Append "*" to the label.
+                size_t len = strlen(options[i].label);
+                if (len + 3 < sizeof(options[i].label))
+                {
+                    strcat(options[i].label, " *");
+                }
+                break;
+            }
+        }
+    }
 
-    int result = run_selection_step(modal, "Disk Selection", 2,
-                                    "Select the target disk for installation:",
-                                    options, count, &selected);
-
-    if (result) {
+    // Run selection step for disk choice.
+    int result = run_selection_step(
+        modal,                                      // Modal window.
+        "Disk Selection",                           // Step title.
+        2,                                          // Step ID.
+        "Select the target disk for installation:", // Step prompt.
+        options,                                    // Options array.
+        count,                                      // Number of options.
+        &selected,                                  // Selected index pointer.
+        1                                           // Allow multi-select.
+    );
+    if (result)
+    {
         // Store the selected disk in global store.
-        Store *store = get_store();
         snprintf(store->disk, sizeof(store->disk), "%s", options[selected].value);
     }
 

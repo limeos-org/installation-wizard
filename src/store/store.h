@@ -12,16 +12,57 @@
 #define STORE_MAX_DISK_LEN 64
 
 /**
+ * Maximum number of partitions.
+ */
+#define STORE_MAX_PARTITIONS 16
+
+/**
+ * Maximum length for mount point path.
+ */
+#define STORE_MAX_MOUNT_LEN 64
+
+/**
+ * Filesystem types for partitions.
+ */
+typedef enum {
+    FS_EXT4,
+    FS_SWAP
+} PartitionFS;
+
+/**
+ * Partition types.
+ */
+typedef enum {
+    PART_PRIMARY,
+    PART_LOGICAL
+} PartitionType;
+
+/**
+ * Represents a single partition configuration.
+ */
+typedef struct Partition {
+    unsigned long long size_bytes;
+    char mount_point[STORE_MAX_MOUNT_LEN];
+    PartitionFS filesystem;
+    PartitionType type;
+    int flag_boot;
+    int flag_esp;
+} Partition;
+
+/**
  * Global store containing user selections and installation settings.
  */
 typedef struct {
     int current_step;
     char locale[STORE_MAX_LOCALE_LEN];
     char disk[STORE_MAX_DISK_LEN];
+    Partition partitions[STORE_MAX_PARTITIONS];
+    int partition_count;
 } Store;
 
 /**
  * Retrieves the global store singleton.
+ *
  * @return Pointer to the global Store instance.
  */
 Store *get_store(void);
