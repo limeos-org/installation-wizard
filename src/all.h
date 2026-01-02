@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <ctype.h>
 #include <dlfcn.h>
+#include <sys/mount.h>
 
 #include "store/store.h"
 #include "utils/command.h"

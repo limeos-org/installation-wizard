@@ -3,40 +3,34 @@
 int setup_bootloader(void)
 {
     Store *store = get_store();
-    char cmd[1024];
+    const char *disk = store->disk;
 
-    // Detect if system is using UEFI by checking for EFI firmware directory.
-    int is_uefi = access("/sys/firmware/efi", F_OK) == 0;
+    // Detect UEFI based on whether user configured an ESP partition.
+    int is_uefi = 0;
+    for (int i = 0; i < store->partition_count; i++)
+    {
+        if (store->partitions[i].flag_esp)
+        {
+            is_uefi = 1;
+            break;
+        }
+    }
 
     // Mount EFI partition if running in UEFI mode.
     if (is_uefi)
     {
-        snprintf(cmd, sizeof(cmd), "mount %s /mnt/boot/efi 2>/dev/null",
-                 store->disk);
-        if (run_cmd(cmd) != 0)
+        if (store->dry_run)
         {
-            return 1;
+            // Log mount command in dry run mode.
+            run_cmd("mount -t vfat /dev/efi /mnt/boot/efi");
         }
-    }
-
-    // Change to the new root directory before chroot.
-    if (!store->dry_run)
-    {
-        if (chdir("/mnt") != 0)
+        else
         {
-            return 1;
-        }
-
-        // Enter the chroot environment.
-        if (chroot("/mnt") != 0)
-        {
-            return 1;
-        }
-
-        // Set working directory to root within chroot.
-        if (chdir("/") != 0)
-        {
-            return 1;
+            // Mount the EFI system partition.
+            if (mount(disk, "/mnt/boot/efi", "vfat", 0, NULL) != 0)
+            {
+                return 1;
+            }
         }
     }
 
@@ -44,11 +38,14 @@ int setup_bootloader(void)
     if (is_uefi)
     {
         // Install GRUB for UEFI systems.
-        if (run_cmd(
-            "grub-install --target=x86_64-efi "
-            "--efi-directory=/boot/efi --bootloader-id=GRUB "
-            "2>/dev/null"
-        ) != 0)
+        char *install_args[] = {
+            "grub-install",
+            "--target=x86_64-efi",
+            "--efi-directory=/boot/efi",
+            "--bootloader-id=GRUB",
+            NULL
+        };
+        if (run_cmd_chroot("grub-install", install_args) != 0)
         {
             return 1;
         }
@@ -56,15 +53,16 @@ int setup_bootloader(void)
     else
     {
         // Install GRUB for BIOS systems.
-        snprintf(cmd, sizeof(cmd), "grub-install %s 2>/dev/null", store->disk);
-        if (run_cmd(cmd) != 0)
+        char *install_args[] = {"grub-install", (char *)disk, NULL};
+        if (run_cmd_chroot("grub-install", install_args) != 0)
         {
             return 1;
         }
     }
 
     // Generate GRUB configuration file.
-    if (run_cmd("grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null") != 0)
+    char *update_args[] = {"update-grub", NULL};
+    if (run_cmd_chroot("update-grub", update_args) != 0)
     {
         return 1;
     }
