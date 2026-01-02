@@ -16,6 +16,7 @@ This document outlines the guidelines for contributing to this repository, inclu
 
 - [Building the installation wizard](#building-the-installation-wizard)
 - [Running the installation wizard](#running-the-installation-wizard)
+- [Testing the installation wizard](#testing-the-installation-wizard)
 
 **General Contributing Guidelines**
 
@@ -88,6 +89,26 @@ Finally, follow the on-screen prompts to navigate through the installation steps
 ```bash
 sudo ./bin/limeos-installation-wizard
 ```
+
+### Testing the installation wizard
+
+This subsection explains how to run the unit test suite. The tests do not write to disk or modify system state, and are thus safe to run on any machine.
+
+First, ensure the cmocka testing library is installed. For Debian-based Linux distributions, run:
+
+```bash
+sudo apt install libcmocka-dev
+```
+
+If you're not using a Debian-based Linux distribution, the package names may differ. In that case, you must consult the package repositories for your specific distribution to identify the appropriate names.
+
+Then, run the test suite:
+
+```bash
+make test
+```
+
+Finally, verify that all tests pass. If any tests fail, review the output to identify the failing test and investigate the cause before submitting changes.
 
 &nbsp;
 
