@@ -175,7 +175,7 @@ A more in-depth guide on SemVer can be found [here](https://semver.org/).
 
 This subsection defines conventions for writing clear and consistent commit messages. Well-written commit messages make project history easier to navigate and simplify debugging with tools like `git bisect`.
 
-To write a commit message, think: "This commit will ..." and complete the sentence. The completion becomes your subject line.
+To write a commit message, think: "This commit will ..." and complete the sentence. Drop the filler words and use the completion as your subject line.
 
 **Example**
 
