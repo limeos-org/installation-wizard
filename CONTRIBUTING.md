@@ -245,12 +245,14 @@ Where:
 int update_item_value(Item *item, int new_value)
 {
     // Ensure the item pointer is not NULL.
-    if (item == NULL) {
+    if (item == NULL)
+    {
         return ERROR_NULL_POINTER;
     }
 
     // Validate the new value against allowed range.
-    if (new_value < MIN_VALUE || new_value > MAX_VALUE) {
+    if (new_value < MIN_VALUE || new_value > MAX_VALUE)
+    {
         return ERROR_VALUE_OUT_OF_RANGE;
     }
 
@@ -349,7 +351,8 @@ Where:
 #define MAX_RETRIES 3
 
 /** A type representing a point in 2D space. */
-typedef struct {
+typedef struct
+{
     int x;
     int y;
 } Vector2;
