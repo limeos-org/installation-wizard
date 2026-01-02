@@ -34,6 +34,20 @@ int setup_bootloader(void)
         }
     }
 
+    // Bind mount system directories needed for chroot environment.
+    if (run_cmd("mount --bind /dev /mnt/dev 2>/dev/null") != 0)
+    {
+        return 1;
+    }
+    if (run_cmd("mount -t proc proc /mnt/proc 2>/dev/null") != 0)
+    {
+        return 1;
+    }
+    if (run_cmd("mount -t sysfs sys /mnt/sys 2>/dev/null") != 0)
+    {
+        return 1;
+    }
+
     // Install GRUB bootloader based on firmware type.
     if (is_uefi)
     {
