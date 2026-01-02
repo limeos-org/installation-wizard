@@ -24,8 +24,9 @@
 
 /**
  * Scrollbar position (relative to modal).
+ * Matches MODAL_CONTENT_X padding on the right side.
  */
-#define MODAL_SCROLLBAR_X (MODAL_WIDTH - 2)
+#define MODAL_SCROLLBAR_X (MODAL_WIDTH - 3)
 
 /**
  * Maximum visible options in selection lists.
