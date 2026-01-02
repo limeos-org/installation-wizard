@@ -334,29 +334,17 @@ int connect_to_server(const char *host);
 
    _**Why?**_ Indicative comments are for consumers. Implementation details belong where the logic lives.
 
-4. All parameters **must** have a `@param` tag describing their purpose.
+4. Doxygen tags **must** follow these conventions: use only `@param`, `@return`, `@note`, and `@warning`; include `@param` for all parameters; separate tag groups with blank lines.
 
-   _**Why?**_ Types show shape; `@param` explains intent (e.g., whether a `user_id` is the actor or the target).
+   _**Why?**_ Limiting tags ensures broad tooling support; requiring `@param` captures intent that types cannot express; blank lines make the structure skimmable.
 
-5. Each group of tags (e.g., `@param`, `@return`) **must** be separated by a blank line.
-
-   _**Why?**_ Visual grouping makes the comment structure skimmable at a glance.
-
-6. Tags **must** be limited to `@param`, `@return`, `@note`, and `@warning`.
-
-   _**Why?**_ These tags are widely supported across tools and editors; exotic tags may not render correctly.
-
-7. Comments **must** use `/**` and end with `*/` (Doxygen format).
+5. Comments **must** use `/**` and end with `*/` (Doxygen format).
 
    _**Why?**_ Doxygen comments enable automatic documentation generation and appear at point-of-use in editors.
 
-8. Complex source files **should** include a file header comment beginning with "This code is responsible for".
+6. Complex source files **should** include a file header comment beginning with "This code is responsible for", placed above any includes.
 
-   _**Why?**_ File-level context helps readers understand the module's role before diving into implementation.
-
-9. File header comments **must** appear above any includes.
-
-   _**Why?**_ Placing the header before includes ensures readers see the module's purpose before implementation details.
+   _**Why?**_ File-level context helps readers understand the module's purpose immediately, before any implementation details.
 
 ### Naming code elements and files
 
