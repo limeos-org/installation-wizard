@@ -33,6 +33,12 @@ This document outlines the guidelines for contributing to this repository, inclu
 - [Ordering code declarations](#ordering-code-declarations)
 - [Structuring files](#structuring-files)
 
+**Document Contributing Guidelines**
+
+- [Storing document assets](#storing-document-assets)
+- [Modifying CONTRIBUTING.md](#modifying-contributingmd)
+- [Modifying README.md](#modifying-readmemd)
+
 **General Contributing Guidelines**
 
 - [Understanding the Git workflow](#understanding-the-git-workflow)
@@ -450,6 +456,146 @@ src/
 │   ├── feature.c
 │   └── feature.h
 ```
+
+&nbsp;
+
+## Document Contributing Guidelines
+
+### Storing document assets
+
+This subsection defines where to store assets used in documentation files like images, or other media.
+
+**Rules**
+
+1. Document assets **must** be stored in the `.assets` directory at the repository root.
+
+   _**Why?**_ Using a platform-agnostic name eases migration if hosting changes. Considering `.github` is a common standard.
+
+2. Assets **should** be organized into subdirectories that group related files (e.g., `.assets/banner/`, `.assets/icons/`).
+
+   _**Why?**_ Assets often need light/dark mode variants or other related versions; subdirectories keep these variants together rather than scattered across a flat structure.
+
+### Modifying CONTRIBUTING.md
+
+This subsection defines rules for authoring and updating `CONTRIBUTING.md`. Consistent structure keeps the guide scannable and ensures that contributors can extend it predictably without degrading quality over time.
+
+Subsections are primarily divided into two variants: **Guiding** subsections, **Convention** subsections and **Informational** subsections.
+
+**Templates**
+
+**Guiding**
+
+```markdown
+### [VERB:TITLE]
+
+> This subsection [RELATIONSHIP] [SECTION] ► [SUBSECTION].
+
+This subsection [ROLE & PURPOSE].
+
+First, [STEP].
+
+Then, [STEP].
+
+Finally, [STEP].
+```
+
+Where:
+
+- `VERB:TITLE` - A gerund-led title describing the action (e.g., "Running the development environment").
+- `RELATIONSHIP` - How this subsection relates to another (`"extends"`, `"gets extended by"`, `"overrides"`, `"gets overriden by"`); omit the entire note line if not applicable.
+- `SECTION ► SUBSECTION` - The target section and subsection being extended or overridden.
+- `ROLE & PURPOSE` - What this subsection does and why it exists.
+- `STEP` - A discrete action in the workflow.
+
+**Convention**
+
+```markdown
+### [VERB:TITLE]
+
+> This subsection [RELATIONSHIP] [SECTION] ► [SUBSECTION].
+
+This subsection [ROLE & PURPOSE].
+
+**Template(s)**
+
+```[TEMPLATE]```
+
+Where:
+
+- `[PLACEHOLDER]` - [DESCRIPTION].
+
+**Example(s)**
+
+```[EXAMPLE]```
+
+**Rule(s)**
+
+1. [RULE]
+
+   _**Why?**_ [RATIONALE].
+```
+
+Where:
+
+- `VERB:TITLE` - A gerund-led title describing the pattern (e.g., "Naming React components").
+- `RELATIONSHIP` - How this subsection relates to another (`"extends"`, `"gets extended by"`, `"overrides"`, `"gets overriden by"`); omit the entire note line if not applicable.
+- `SECTION ► SUBSECTION` - The target section and subsection being extended or overridden.
+- `ROLE & PURPOSE` - What this subsection does and why it exists.
+- `TEMPLATE` - A reusable structure contributors should follow.
+- `PLACEHOLDER` - A variable in the template requiring explanation.
+- `DESCRIPTION` - What the placeholder means or how to fill it in.
+- `EXAMPLE` - A concrete demonstration of the template in use.
+- `RULE` - A rule statement using RFC modality (must, should, may).
+- `RATIONALE` - The concrete reason the rule exists.
+
+**Informational**
+
+```markdown
+### [VERB:TITLE]
+
+[INFORMATION].
+```
+
+Where:
+
+- `VERB:TITLE` - A gerund-led title describing the pattern (e.g., "Understanding the authentication system").
+- `INFORMATION` - The information, which could range in size from a few sentences to a few paragraphs.
+
+**Rules**
+
+1. Rules **must** include exactly one _**Why?**_ paragraph per rule.
+
+   _**Why?**_ The rule states the contract; the why preserves intent so future edits don't regress.
+
+2. "Why" paragraphs **should** explain the causal link between the rule and its benefit, not just the benefit alone.
+
+   _**Why?**_ "Consistent naming makes searches faster" explains causation; "improves code quality" just names a vague outcome without showing how the rule achieves it.
+
+3. Rules **must** use consistent modality: **must**, **must not**, **should**, **may**.
+
+   _**Why?**_ Standard wording makes requirement strength explicit to readers, reviewers, and AI.
+
+4. The `extends`/`overrides` note **must** be included when the subsection modifies or builds upon another.
+
+   _**Why?**_ Without the note, readers won't know rules conflict or stack; explicit precedence prevents misapplication.
+
+5. **Template(s)** and **Example(s)** sections **may** be omitted when the rules are self-evident.
+
+   _**Why?**_ Forcing examples on simple rule sets adds bulk without clarifying intent.
+
+### Modifying README.md
+
+This subsection defines rules for updating `README.md`. The README acts as a menu, a short, scannable entry point that directs readers to deeper documentation rather than duplicating it.
+
+**Rules**
+
+1. The README **must** stay short and act as a navigation hub, directing to docs like `CONTRIBUTING.md` or `LICENSE.md`.
+
+   _**Why?**_ Readers land on the README first. A concise overview with clear links gets them to the right place faster than a wall of text.
+
+2. Content **should** be moved to dedicated docs when it exceeds a few paragraphs.
+
+   _**Why?**_ Long READMEs become hard to maintain and bury the essential "what is this / how do I run it" information.
 
 &nbsp;
 
