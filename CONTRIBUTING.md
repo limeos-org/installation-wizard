@@ -128,7 +128,7 @@ git push origin feature/audio-support
 # Submit pull request targeting develop
 ```
 
-Changes will be reviewed by project maintainers. Approved changes are merged or squashed into `develop`. When sufficient changes accumulate, `develop` is rebased onto `main` and a new release tag is created.
+Changes will be reviewed by project maintainers. Approved changes are merged or squashed into `develop`. When sufficient changes accumulate, maintainers merge `develop` into `main` and create a new release tag on `main` following SemVer conventions.
 
 ### Determining version numbers
 
