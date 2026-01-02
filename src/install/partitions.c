@@ -40,7 +40,10 @@ int create_partitions(const char *disk, Store *store)
                 "parted -s %s set %d boot on 2>/dev/null",
                 disk, i + 1
             );
-            system(cmd);
+            if (system(cmd) != 0)
+            {
+                return 1;
+            }
         }
 
         // Set ESP flag if needed.
@@ -51,7 +54,10 @@ int create_partitions(const char *disk, Store *store)
                 "parted -s %s set %d esp on 2>/dev/null",
                 disk, i + 1
             );
-            system(cmd);
+            if (system(cmd) != 0)
+            {
+                return 1;
+            }
         }
 
         start_mb = end_mb;
