@@ -9,6 +9,7 @@
 #define FIELD_TYPE   2
 #define FIELD_FLAGS  3
 #define FIELD_COUNT  4
+#define DEFAULT_SIZE_INDEX 11
 
 static const unsigned long long size_presets[] =
 {
@@ -259,7 +260,7 @@ int add_partition_dialog(
     format_disk_size(free_space, free_str, sizeof(free_str));
 
     // Initialize form field indices with defaults.
-    int size_idx = 11;     // Default to 128G.
+    int size_idx = DEFAULT_SIZE_INDEX;
     int mount_idx = 0;     // Default to /.
     int type_idx = 0;      // Default to primary.
     int flag_idx = 0;      // Default to none.

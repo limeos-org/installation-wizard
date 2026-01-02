@@ -58,8 +58,12 @@ void render_partition_table(
     char header[64];
     snprintf(
         header, sizeof(header),
-        " #  %-10s %-8s %-5s %-8s %-6s",
-        "Size", "Mount", "FS", "Type", "Flags"
+        " #  %-*s %-*s %-*s %-*s %-*s",
+        COL_WIDTH_SIZE, "Size",
+        COL_WIDTH_MOUNT, "Mount",
+        COL_WIDTH_FS, "FS",
+        COL_WIDTH_TYPE, "Type",
+        COL_WIDTH_FLAGS, "Flags"
     );
     mvwprintw(modal, 6, 3, "%-*s", table_width, header);
     wattroff(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_HEADER));
@@ -98,10 +102,13 @@ void render_partition_table(
             char row[64];
             snprintf(
                 row, sizeof(row),
-                " %-2d %-10s %-8s %-5s %-8s %-6s",
-                part_index + 1, size_str, mount,
-                fs_to_string(p->filesystem),
-                type_to_string(p->type), flags
+                " %-*d %-*s %-*s %-*s %-*s %-*s",
+                COL_WIDTH_NUM, part_index + 1,
+                COL_WIDTH_SIZE, size_str,
+                COL_WIDTH_MOUNT, mount,
+                COL_WIDTH_FS, fs_to_string(p->filesystem),
+                COL_WIDTH_TYPE, type_to_string(p->type),
+                COL_WIDTH_FLAGS, flags
             );
             mvwprintw(modal, 7 + i, 3, "%-*s", table_width, row);
 

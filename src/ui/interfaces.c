@@ -222,15 +222,15 @@ static void render_styled_note(
 {
     // Fill background area with slightly darker color.
     wattron(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_NOTE_BG));
-    for (int row = 0; row < 2; row++)
+    for (int row = 0; row < NOTE_HEIGHT; row++)
     {
-        mvwprintw(window, y + row, x + 1, "%*s", MODAL_WIDTH - 8, "");
+        mvwprintw(window, y + row, x + 1, "%*s", MODAL_WIDTH - NOTE_MARGIN, "");
     }
     wattroff(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_NOTE_BG));
 
     // Draw accent line on the left.
     wattron(window, COLOR_PAIR(accent_color) | A_REVERSE);
-    for (int row = 0; row < 2; row++)
+    for (int row = 0; row < NOTE_HEIGHT; row++)
     {
         mvwaddch(window, y + row, x, ' ');
     }
@@ -294,7 +294,7 @@ void render_form(
         int row_y = y + field_index;
         if (field_index > focused)
         {
-            row_y += 4; // Shift down for 2-line note + gap above + gap below.
+            row_y += FORM_DESCRIPTION_SHIFT;
         }
 
         int is_focused = (field_index == focused);

@@ -7,6 +7,16 @@
 #define MAX_VISIBLE_PARTITIONS 3
 
 /**
+ * Column widths for partition table.
+ */
+#define COL_WIDTH_NUM    2
+#define COL_WIDTH_SIZE   10
+#define COL_WIDTH_MOUNT  8
+#define COL_WIDTH_FS     5
+#define COL_WIDTH_TYPE   8
+#define COL_WIDTH_FLAGS  6
+
+/**
  * Converts a filesystem type enum to its string representation.
  *
  * @param fs The filesystem type.

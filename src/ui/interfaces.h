@@ -2,6 +2,22 @@
 #include "../all.h"
 
 /**
+ * Height of note/info/warning/error boxes in rows.
+ */
+#define NOTE_HEIGHT 2
+
+/**
+ * Margin from modal edge for note boxes.
+ */
+#define NOTE_MARGIN 8
+
+/**
+ * Row shift to accommodate description below focused form field.
+ * Accounts for 2-line note + gap above + gap below.
+ */
+#define FORM_DESCRIPTION_SHIFT 4
+
+/**
  * Column alignment options.
  */
 typedef enum {
