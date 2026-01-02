@@ -98,14 +98,25 @@ int run_confirmation_step(WINDOW *modal)
     }
     else
     {
-        // Display warning about disk formatting.
-        char warning_text[128];
-        snprintf(
-            warning_text, sizeof(warning_text),
-            "All data on %s will be erased!\n"
-            "This action cannot be undone.", store->disk
-        );
-        render_warning(modal, 10, 3, warning_text);
+        if (store->dry_run)
+        {
+            // Display info about dry run mode.
+            render_info(modal, 10, 3,
+                "Dry run mode enabled.\n"
+                "No changes will be made to disk."
+            );
+        }
+        else
+        {
+            // Display warning about disk formatting.
+            char warning_text[128];
+            snprintf(
+                warning_text, sizeof(warning_text),
+                "All data on %s will be erased!\n"
+                "This action cannot be undone.", store->disk
+            );
+            render_warning(modal, 10, 3, warning_text);
+        }
 
         // Display navigation footer.
         const char *footer[] = {"[Enter] Install", "[Esc] Back", NULL};

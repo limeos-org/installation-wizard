@@ -6,14 +6,27 @@
 
 #include "all.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    Store *store = get_store();
+
+    // Parse command-line arguments.
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "--dry") == 0)
+        {
+            store->dry_run = 1;
+        }
+    }
+
+    // Initialize ncurses UI.
     init_ui();
 
     // Create the centered modal window for wizard content.
     WINDOW *modal = create_modal("Installation Wizard");
 
-    // Step-based navigation loop.
+    // A loop that runs throughout the entire wizard process and waits for user
+    // input at each step, allowing back-and-forth navigation between steps.
     int step = 1;
     while (step <= 4) {
         int result = 0;

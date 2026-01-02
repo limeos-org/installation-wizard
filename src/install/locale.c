@@ -1,9 +1,9 @@
 #include "../all.h"
 
-int configure_locale(const char *locale)
+int configure_locale(void)
 {
     // TODO: Implement locale configuration logic.
-    (void)locale;
+    (void)get_store();
     napms(200);
     return 0;
 }

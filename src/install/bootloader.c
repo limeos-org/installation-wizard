@@ -1,9 +1,9 @@
 #include "../all.h"
 
-int setup_bootloader(const char *disk)
+int setup_bootloader(void)
 {
     // TODO: Implement actual bootloader installation logic.
-    (void)disk;
+    (void)get_store();
     napms(500);
     return 0;
 }

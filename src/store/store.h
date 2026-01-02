@@ -54,6 +54,7 @@ typedef struct Partition {
  */
 typedef struct {
     int current_step;
+    int dry_run;
     char locale[STORE_MAX_LOCALE_LEN];
     char disk[STORE_MAX_DISK_LEN];
     Partition partitions[STORE_MAX_PARTITIONS];

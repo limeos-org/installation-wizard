@@ -14,6 +14,7 @@
 #include <ctype.h>
 
 #include "store/store.h"
+#include "utils/cmd.h"
 #include "utils/disk.h"
 #include "ui/ui.h"
 #include "ui/modal.h"

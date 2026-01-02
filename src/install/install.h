@@ -1,38 +1,6 @@
 #pragma once
 #include "../all.h"
 
-// Development flags to skip installation steps.
-// Uncomment to skip the corresponding step during testing.
-//
-// #define INSTALL_SKIP_PARTITIONS
-// #define INSTALL_SKIP_ROOTFS
-// #define INSTALL_SKIP_BOOTLOADER
-// #define INSTALL_SKIP_LOCALE
-
-#ifdef INSTALL_SKIP_PARTITIONS
-#define INSTALL_SKIP_PARTITIONS_FLAG 1
-#else
-#define INSTALL_SKIP_PARTITIONS_FLAG 0
-#endif
-
-#ifdef INSTALL_SKIP_ROOTFS
-#define INSTALL_SKIP_ROOTFS_FLAG 1
-#else
-#define INSTALL_SKIP_ROOTFS_FLAG 0
-#endif
-
-#ifdef INSTALL_SKIP_BOOTLOADER
-#define INSTALL_SKIP_BOOTLOADER_FLAG 1
-#else
-#define INSTALL_SKIP_BOOTLOADER_FLAG 0
-#endif
-
-#ifdef INSTALL_SKIP_LOCALE
-#define INSTALL_SKIP_LOCALE_FLAG 1
-#else
-#define INSTALL_SKIP_LOCALE_FLAG 0
-#endif
-
 /**
  * Installation result codes.
  */
