@@ -17,6 +17,11 @@ This document outlines the guidelines for contributing to this repository, inclu
 - [Building the installation wizard](#building-the-installation-wizard)
 - [Running the installation wizard](#running-the-installation-wizard)
 
+**General Contributing Guidelines**
+
+- [Understanding the Git workflow](#understanding-the-git-workflow)
+- [Determining version numbers](#determining-version-numbers)
+
 **C Language Contributing Guidelines**
 
 - [Writing documentation](#writing-documentation)  
@@ -39,11 +44,6 @@ This document outlines the guidelines for contributing to this repository, inclu
 - [Modifying CONTRIBUTING.md](#modifying-contributingmd)
 - [Modifying README.md](#modifying-readmemd)
 
-**General Contributing Guidelines**
-
-- [Understanding the Git workflow](#understanding-the-git-workflow)
-- [Determining version numbers](#determining-version-numbers)
-
 &nbsp;
 
 ## Repository Contributing Guidelines
@@ -55,6 +55,66 @@ This document outlines the guidelines for contributing to this repository, inclu
 ### Running the installation wizard
 
 **TBA**
+
+&nbsp;
+
+## General Contributing Guidelines
+
+> **Important:** These guidelines are replicated across all LimeOS repositories. Any changes made here must also be applied to the `CONTRIBUTING.md` files across all other repositories to maintain consistency.
+
+### Understanding the Git workflow
+
+This subsection documents the branching strategy and contribution process. Following this workflow ensures smooth collaboration and maintains code quality across releases.
+
+This repository uses two main branches:
+
+- `main` - Stable release code, must not be pushed to directly.
+- `develop` - Development code, must not be pushed to directly.
+
+**Rules**
+
+1. Contributors **must** fork the repository and create a branch from `develop` prefixed with `feature/`.
+
+   _**Why?**_ Feature branches isolate work-in-progress and make code review manageable.
+
+2. Contributors **must not** push directly to `main` or `develop`.
+
+   _**Why?**_ Protected branches ensure all changes go through review, maintaining code quality.
+
+3. Pull requests **must** target the `develop` branch.
+
+   _**Why?**_ Targeting develop allows integration testing before changes reach the stable main branch.
+
+**Example**
+
+```bash
+git checkout develop
+git checkout -b feature/audio-support
+# Make changes and commit
+git push origin feature/audio-support
+# Submit pull request targeting develop
+```
+
+Changes will be reviewed by project maintainers. Approved changes are merged or squashed into `develop`. When sufficient changes accumulate, `develop` is rebased onto `main` and a new release tag is created.
+
+### Determining version numbers
+
+This subsection defines the versioning scheme used for releases. Semantic Versioning provides clear expectations about compatibility between versions.
+
+This repository adheres to Semantic Versioning (SemVer), which uses a three-part version number:
+
+- `MAJOR` - Incremented for incompatible API changes.
+- `MINOR` - Incremented for backwards-compatible new features.
+- `PATCH` - Incremented for backwards-compatible bug fixes.
+
+**Example**
+
+- `1.0.0` - Initial stable release.
+- `1.1.0` - Added new features.
+- `1.1.1` - Added bug fixes.
+- `2.0.0` - Introduced breaking changes.
+
+A more in-depth guide on SemVer can be found [here](https://semver.org/).
 
 &nbsp;
 
@@ -596,63 +656,3 @@ This subsection defines rules for updating `README.md`. The README acts as a men
 2. Content **should** be moved to dedicated docs when it exceeds a few paragraphs.
 
    _**Why?**_ Long READMEs become hard to maintain and bury the essential "what is this / how do I run it" information.
-
-&nbsp;
-
-## General Contributing Guidelines
-
-> **Important:** These guidelines are replicated across all LimeOS repositories. Any changes made here must also be applied to the `CONTRIBUTING.md` files across all other repositories to maintain consistency.
-
-### Understanding the Git workflow
-
-This subsection documents the branching strategy and contribution process. Following this workflow ensures smooth collaboration and maintains code quality across releases.
-
-This repository uses two main branches:
-
-- `main` - Stable release code, must not be pushed to directly.
-- `develop` - Development code, must not be pushed to directly.
-
-**Rules**
-
-1. Contributors **must** fork the repository and create a branch from `develop` prefixed with `feature/`.
-
-   _**Why?**_ Feature branches isolate work-in-progress and make code review manageable.
-
-2. Contributors **must not** push directly to `main` or `develop`.
-
-   _**Why?**_ Protected branches ensure all changes go through review, maintaining code quality.
-
-3. Pull requests **must** target the `develop` branch.
-
-   _**Why?**_ Targeting develop allows integration testing before changes reach the stable main branch.
-
-**Example**
-
-```bash
-git checkout develop
-git checkout -b feature/audio-support
-# Make changes and commit
-git push origin feature/audio-support
-# Submit pull request targeting develop
-```
-
-Changes will be reviewed by project maintainers. Approved changes are merged or squashed into `develop`. When sufficient changes accumulate, `develop` is rebased onto `main` and a new release tag is created.
-
-### Determining version numbers
-
-This subsection defines the versioning scheme used for releases. Semantic Versioning provides clear expectations about compatibility between versions.
-
-This repository adheres to Semantic Versioning (SemVer), which uses a three-part version number:
-
-- `MAJOR` - Incremented for incompatible API changes.
-- `MINOR` - Incremented for backwards-compatible new features.
-- `PATCH` - Incremented for backwards-compatible bug fixes.
-
-**Example**
-
-- `1.0.0` - Initial stable release.
-- `1.1.0` - Added new features.
-- `1.1.1` - Added bug fixes.
-- `2.0.0` - Introduced breaking changes.
-
-A more in-depth guide on SemVer can be found [here](https://semver.org/).
