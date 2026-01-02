@@ -494,27 +494,11 @@ This subsection defines naming conventions for compiled binaries and libraries.
 
 This subsection defines the order in which code elements should appear within source and header files. Consistent ordering helps contributors quickly locate specific elements, reducing cognitive load when navigating unfamiliar code.
 
-Code elements **must** be organized in the following order:
+**Rules**
 
-1. **Includes**
+1. Code elements **must** be organized in the following order: **Includes**, **Macros**, **Types**, **Global variables**, **Functions**.
 
-   _**Why?**_ Dependencies come first so readers immediately see what the file relies on.
-
-2. **Macros**
-
-   _**Why?**_ Macros must precede code that uses them; placing them early ensures they're defined before use.
-
-3. **Types**
-
-   _**Why?**_ Types must precede variables and functions that reference them.
-
-4. **Global variables**
-
-   _**Why?**_ Variables often depend on types; placing them after ensures dependencies are defined.
-
-5. **Functions**
-
-   _**Why?**_ Logic comes last, after all dependencies (includes, macros, types, data) are established.
+   _**Why?**_ This order ensures dependencies are defined before use: includes bring in external dependencies, macros are available for type definitions, types are available for variable declarations, and functions come last after all their dependencies are established.
 
 ### Structuring files
 
@@ -573,7 +557,7 @@ This subsection defines where to store assets used in documentation files like i
 
 This subsection defines rules for authoring and updating `CONTRIBUTING.md`. Consistent structure keeps the guide scannable and ensures that contributors can extend it predictably without degrading quality over time.
 
-Subsections are primarily divided into two variants: **Guiding** subsections, **Convention** subsections and **Informational** subsections.
+Subsections are primarily divided into three variants: **Guiding** subsections, **Convention** subsections and **Informational** subsections.
 
 **Templates**
 
