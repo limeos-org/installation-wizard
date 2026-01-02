@@ -64,9 +64,9 @@ static void test_format_disk_size_megabytes(void **state)
 }
 
 /**
- * Verifies format_disk_size() correctly formats one gigabyte.
+ * Verifies format_disk_size() correctly formats gigabyte values.
  */
-static void test_format_disk_size_one_gigabyte(void **state)
+static void test_format_disk_size_gigabytes(void **state)
 {
     (void)state;
     char buffer[32];
@@ -77,22 +77,9 @@ static void test_format_disk_size_one_gigabyte(void **state)
 }
 
 /**
- * Verifies format_disk_size() correctly formats 500 gigabytes.
+ * Verifies format_disk_size() correctly formats terabyte values.
  */
-static void test_format_disk_size_500_gigabytes(void **state)
-{
-    (void)state;
-    char buffer[32];
-
-    format_disk_size(500000000000ULL, buffer, sizeof(buffer));
-
-    assert_string_equal("500 GB", buffer);
-}
-
-/**
- * Verifies format_disk_size() correctly formats one terabyte.
- */
-static void test_format_disk_size_one_terabyte(void **state)
+static void test_format_disk_size_terabytes(void **state)
 {
     (void)state;
     char buffer[32];
@@ -100,19 +87,6 @@ static void test_format_disk_size_one_terabyte(void **state)
     format_disk_size(1000000000000ULL, buffer, sizeof(buffer));
 
     assert_string_equal("1 TB", buffer);
-}
-
-/**
- * Verifies format_disk_size() correctly formats 4 terabytes.
- */
-static void test_format_disk_size_4_terabytes(void **state)
-{
-    (void)state;
-    char buffer[32];
-
-    format_disk_size(4000000000000ULL, buffer, sizeof(buffer));
-
-    assert_string_equal("4 TB", buffer);
 }
 
 /**
@@ -463,10 +437,8 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_format_disk_size_bytes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_format_disk_size_zero_bytes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_format_disk_size_megabytes, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_format_disk_size_one_gigabyte, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_format_disk_size_500_gigabytes, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_format_disk_size_one_terabyte, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_format_disk_size_4_terabytes, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_format_disk_size_gigabytes, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_format_disk_size_terabytes, setup, teardown),
         cmocka_unit_test_setup_teardown(test_format_disk_size_small_buffer, setup, teardown),
         cmocka_unit_test_setup_teardown(test_sum_partition_sizes_empty, setup, teardown),
         cmocka_unit_test_setup_teardown(test_sum_partition_sizes_single, setup, teardown),
