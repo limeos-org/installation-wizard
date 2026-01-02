@@ -14,18 +14,20 @@ WINDOW *create_modal(const char *title)
     int start_y = (screen_height - MODAL_HEIGHT) / 2;
     int start_x = (screen_width - MODAL_WIDTH) / 2;
 
-    // Create window with border and background color.
+    // Create window with background color.
     WINDOW *window = newwin(MODAL_HEIGHT, MODAL_WIDTH, start_y, start_x);
     wbkgd(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_MAIN));
-    box(window, 0, 0);
 
     // Enable arrow key detection on this window.
     keypad(window, TRUE);
 
-    // Draw title centered at top with bracket decoration.
-    int title_length = strlen(title);
-    int title_x = (MODAL_WIDTH - title_length - 4) / 2;
-    mvwprintw(window, 0, title_x, "[ %s ]", title);
+    // Draw full-width title bar with lighter background.
+    wattron(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_ROW_ODD));
+    mvwprintw(window, 0, 0, "%*s", MODAL_WIDTH, "");
+    int title_x = (MODAL_WIDTH - strlen(title)) / 2;
+    mvwprintw(window, 0, title_x, "%s", title);
+    wattroff(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_ROW_ODD));
+
     wrefresh(window);
 
     return window;
@@ -33,9 +35,9 @@ WINDOW *create_modal(const char *title)
 
 void clear_modal(WINDOW *modal)
 {
-    // Clear content area with spaces, preserving the border.
-    for (int row = 1; row < MODAL_HEIGHT - 1; row++) {
-        mvwprintw(modal, row, 1, "%*s", MODAL_WIDTH - 2, "");
+    // Clear content area with spaces, preserving the title bar.
+    for (int row = 1; row < MODAL_HEIGHT; row++) {
+        mvwprintw(modal, row, 0, "%*s", MODAL_WIDTH, "");
     }
 }
 
