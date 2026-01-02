@@ -18,7 +18,7 @@ int run_confirmation_step(WINDOW *modal)
     // Display summary of selected options.
     mvwprintw(modal, 4, 3, "Ready to install LimeOS with the following settings:");
     mvwprintw(modal, 6, 3, "  Locale: %s", store->locale);
-    mvwprintw(modal, 7, 3, "  Disk:   %s", store->disk);
+    mvwprintw(modal, 7, 3, "  Disk: %s", store->disk);
 
     // Display partition summary.
     unsigned long long disk_size = get_disk_size(store->disk);

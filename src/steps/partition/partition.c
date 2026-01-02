@@ -75,7 +75,7 @@ int run_partition_step(WINDOW *modal)
 
         // Render footer and refresh display.
         const char *footer[] = {
-            "[Arrows] Navigate", "[Enter] Select", "[Esc] Back", NULL
+            "[Left][Right] Navigate", "[Enter] Select", "[Esc] Back", NULL
         };
         render_footer(modal, footer);
         wrefresh(modal);
