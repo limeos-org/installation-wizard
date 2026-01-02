@@ -325,24 +325,13 @@ int connect_to_server(const char *host);
 
    _**Why?**_ Placing the header first ensures readers see the module's purpose immediately, before any implementation details.
 
-**Example** (file header)
-
-```c
-/**
- * This code is responsible for user authentication and session management.
- *
- * @note Session timestamps use local time instead of UTC, causing
- *       potential Daylight Saving Time issues.
- */
-
-#include <stdio.h>
-```
-
 ### Naming code elements and files
 
 This subsection defines naming conventions for functions, variables, types, macros, and files. Unlike many modern programming languages, C lacks an official style guide. In this codebase, we follow naming practices that align closely with traditional C programming patterns found in established projects like the Linux kernel and GNU software.
 
 #### Naming functions
+
+This subsection defines naming conventions for functions.
 
 1. Function names **must** follow `snake_case()` convention.
 
@@ -358,6 +347,8 @@ This subsection defines naming conventions for functions, variables, types, macr
 
 #### Naming variables
 
+This subsection defines naming conventions for variables.
+
 1. Variable names **must** follow `snake_case` convention.
 
    _**Why?**_ Consistent casing with functions keeps the codebase visually uniform and predictable.
@@ -371,6 +362,8 @@ This subsection defines naming conventions for functions, variables, types, macr
    _**Why?**_ Abbreviations create project-specific vocabulary that readers must memorize and reduce discoverability in search.
 
 #### Naming parameters
+
+This subsection defines naming conventions for function parameters.
 
 1. Parameter names **must** follow `snake_case` convention.
 
@@ -390,6 +383,8 @@ This subsection defines naming conventions for functions, variables, types, macr
 
 #### Naming types
 
+This subsection defines naming conventions for types (structs, enums, typedefs).
+
 1. Type names **must** follow `PascalCase` convention.
 
    _**Why?**_ PascalCase distinguishes types from variables and functions at a glance.
@@ -403,6 +398,8 @@ This subsection defines naming conventions for functions, variables, types, macr
    _**Why?**_ Module prefixes prevent name collisions across the codebase.
 
 #### Naming macros
+
+This subsection defines naming conventions for preprocessor macros.
 
 1. Macro names **must** follow `SCREAMING_SNAKE_CASE` convention (all uppercase).
 
@@ -422,6 +419,8 @@ This subsection defines naming conventions for functions, variables, types, macr
 
 #### Naming files
 
+This subsection defines naming conventions for source and header files.
+
 1. File names **must** follow `snake_case` convention.
 
    _**Why?**_ Snake case matches the function naming convention and avoids case-sensitivity issues across file systems.
@@ -439,6 +438,8 @@ This subsection defines naming conventions for functions, variables, types, macr
    _**Why?**_ Long filenames with multiple concepts signal that directory structure should carry that meaning instead.
 
 #### Naming binaries
+
+This subsection defines naming conventions for compiled binaries and libraries.
 
 1. Binary names **must** follow `dash-case` convention.
 
