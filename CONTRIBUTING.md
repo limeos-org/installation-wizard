@@ -56,7 +56,7 @@ First, install the required dependencies. For Debian-based Linux distributions, 
 
 ```bash
 sudo apt install \
-    clang \
+    gcc \
     make \
     libncurses-dev
 ```
