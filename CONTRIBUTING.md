@@ -391,11 +391,11 @@ int connect_to_server(const char *host);
 
    _**Why?**_ Limiting tags ensures broad tooling support; requiring `@param` captures intent that types cannot express; blank lines make the structure skimmable.
 
-5. Comments **must** use `/**` and end with `*/` (Doxygen format).
+5. Declaration comments **must** use `/**` and end with `*/` (Doxygen format).
 
    _**Why?**_ Doxygen comments enable automatic documentation generation and appear at point-of-use in editors.
 
-6. Complex source files **should** include a file header comment beginning with "This code is responsible for", placed above any includes.
+6. Complex source files **should** begin with a file header comment placed above any includes. The file header comment **must** use `/** ... */` but **must not** include any Doxygen tags and **should** begin with "This code is responsible for".
 
    _**Why?**_ File-level context helps readers understand the module's purpose immediately, before any implementation details.
 
