@@ -193,7 +193,11 @@ To write a commit message, think: "This commit will ..." and complete the senten
 
    _**Why?**_ Short subjects remain fully visible in `git log --oneline` and GitHub's commit list without truncation.
 
-3. The body, if included, **should** be separated from the subject by a blank line and wrap at 72 characters.
+3. The subject line **must not** end with a period.
+
+   _**Why?**_ The subject is a title, not a sentence; omitting the period is the standard convention.
+
+4. The body, if included, **should** be separated from the subject by a blank line and wrap at 72 characters.
 
    _**Why?**_ Git tooling treats the first line as the subject; a blank line ensures proper parsing, and wrapped lines display correctly without horizontal scrolling.
 
