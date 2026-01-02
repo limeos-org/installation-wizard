@@ -10,7 +10,7 @@ int run_cmd(const char *cmd)
     {
         if (!dry_run_log)
         {
-            dry_run_log = fopen("dry-run.log", "w");
+            dry_run_log = fopen(DRY_RUN_LOG_PATH, "w");
         }
         if (dry_run_log)
         {

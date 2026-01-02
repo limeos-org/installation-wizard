@@ -1,9 +1,15 @@
 #pragma once
+#include "../all.h"
+
+/**
+ * Path to the dry run log file.
+ */
+#define DRY_RUN_LOG_PATH "dry-run.log"
 
 /**
  * Executes a shell command, or logs it if dry run mode is enabled.
  *
- * In dry run mode, commands are written to "dry-run.log" instead of
+ * In dry run mode, commands are written to DRY_RUN_LOG_PATH instead of
  * being executed, and the function returns 0 (success).
  *
  * @param cmd The shell command to execute.
