@@ -136,10 +136,6 @@ identify the failing test and investigate the cause before submitting changes.
 
 ## General Contributing Guidelines
 
-> **Important:** This section is replicated across all LimeOS repositories.
-> Any changes made here must also be applied to the `CONTRIBUTING.md` files
-> across all other repositories to maintain consistency.
-
 ### Understanding the Git workflow
 
 This subsection documents the branching strategy and contribution process.
@@ -247,11 +243,6 @@ sentence. Drop the filler words and use the completion as your subject line.
 &nbsp;
 
 ## C Language Contributing Guidelines
-
-> **Important:** This section is replicated across all LimeOS repositories
-> that use the C programming language. Any changes made here must also be
-> applied to the `CONTRIBUTING.md` files across similar repositories to
-> maintain consistency.
 
 ### Writing documentation
 
@@ -373,9 +364,12 @@ files and provide intent that signatures alone cannot express.
 
 Where:
 
-- `A/The` - `"A"` for instances (types), `"The"` for singletons (macros, global variables).
-- `THING` - What it literally is (`"type"`, `"maximum retry count"`, `"configuration struct"`).
-- `RELATIONSHIP` - How it relates to its role (`"representing"`, `"for"`, `"defining"`).
+- `A/The` - `"A"` for instances (types), `"The"` for singletons (macros, global
+  variables).
+- `THING` - What it literally is (`"type"`, `"maximum retry count"`,
+  `"configuration struct"`).
+- `RELATIONSHIP` - How it relates to its role (`"representing"`, `"for"`,
+  `"defining"`).
 - `ROLE/PURPOSE` - What it's for.
 
 2\. Action template, for things that _do_ (functions):
@@ -769,10 +763,6 @@ else
 &nbsp;
 
 ## Document Contributing Guidelines
-
-> **Important:** This section is replicated across all LimeOS repositories. Any
-> changes made here must also be applied to the `CONTRIBUTING.md` files across
-> all other repositories to maintain consistency.
 
 ### Storing document assets
 
