@@ -150,18 +150,28 @@ This repository uses two main branches:
 
 **Rules**
 
-1. Contributors **must** fork the repository and create a branch from `develop`
-   prefixed with `feature/`.
+1. External contributors **must** fork the repository and create a branch from
+   `develop`.
 
-   _**Why?**_ Feature branches isolate work-in-progress and make code review
-   manageable.
+   _**Why?**_ Forks isolate work-in-progress without granting write access to
+   the main repository.
 
-2. Contributors **must not** push directly to `main` or `develop`.
+   _**Exception:**_ Project members **may** branch directly in the main
+   repository, but **must** still follow the branching and review rules below.
+
+2. Branches **must** use one of the following prefixes: `feature/`, `fix/`,
+   `docs/`, or `chore/`.
+
+   _**Why?**_ Prefixes categorize work at a glance: `feature/` for new
+   functionality, `fix/` for bug fixes, `docs/` for documentation, and `chore/`
+   for refactors or build changes.
+
+3. Contributors **must not** push directly to `main` or `develop`.
 
    _**Why?**_ Protected branches ensure all changes go through review,
    maintaining code quality.
 
-3. Pull requests **must** target the `develop` branch.
+4. Pull requests **must** target the `develop` branch.
 
    _**Why?**_ Targeting develop allows integration testing before changes reach
    the stable main branch.
@@ -170,7 +180,7 @@ This repository uses two main branches:
 
 ```bash
 git checkout develop
-git checkout -b feature/audio-support
+git checkout -b feature/audio-support  # or fix/, docs/, chore/
 # Make changes and commit
 git push origin feature/audio-support
 # Submit pull request targeting develop
