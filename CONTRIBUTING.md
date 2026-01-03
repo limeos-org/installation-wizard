@@ -528,9 +528,9 @@ int connect_to_server(const char *host);
 
 This subsection defines naming conventions for functions, variables, types,
 macros, and files. Unlike many modern programming languages, C lacks an
-official style guide. In this codebase, we follow naming practices that
-align closely with traditional C programming patterns found in established
-projects like the Linux kernel and GNU software.
+official style guide. We follow a C naming style broadly reminiscent of
+established projects (e.g., Linux kernel and GNU), with additional
+project-specific conventions.
 
 #### Naming functions
 
