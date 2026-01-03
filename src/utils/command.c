@@ -9,7 +9,6 @@ static FILE *dry_run_log = NULL;
 
 int run_command(const char *command)
 {
-    // Get store to check dry run mode.
     Store *store = get_store();
 
     // Log command to file instead of executing in dry run mode.

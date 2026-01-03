@@ -34,7 +34,8 @@ WINDOW *create_modal(const char *title)
 void clear_modal(WINDOW *modal)
 {
     // Clear content area with spaces, preserving the title bar.
-    for (int row = 1; row < MODAL_HEIGHT; row++) {
+    for (int row = 1; row < MODAL_HEIGHT; row++)
+    {
         mvwprintw(modal, row, 0, "%*s", MODAL_WIDTH, "");
     }
 }

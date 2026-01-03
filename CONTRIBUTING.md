@@ -507,7 +507,7 @@ int connect_to_server(const char *host);
 
 6. Complex source files **should** begin with a file header comment placed above
    any includes. The file header comment **must** use `/** ... */` but
-   **must not** include any Doxygen tags and **should** begin with "This
+   **must not** include any Doxygen tags and **must** begin with "This
    code is responsible for".
 
    _**Why?**_ File-level context helps readers understand the module's purpose

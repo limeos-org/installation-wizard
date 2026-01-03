@@ -13,12 +13,14 @@ void initialize_ui(void)
     set_escdelay(25);
 
     // Configure color pairs if terminal supports colors.
-    if (has_colors()) {
+    if (has_colors())
+    {
         start_color();
         use_default_colors();
 
         // Define custom colors if supported.
-        if (can_change_color()) {
+        if (can_change_color())
+        {
             init_color(COLOR_WHITE,                900, 900, 880);
             init_color(CUSTOM_COLOR_ROW_ODD_BG,    820, 820, 800);
             init_color(CUSTOM_COLOR_HEADER_BG,     700, 700, 680);

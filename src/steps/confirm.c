@@ -29,10 +29,9 @@ int run_confirmation_step(WINDOW *modal)
     if (store->partition_count > 0)
     {
         mvwprintw(
-            modal,                                      // Modal window.
-            8,                                          // Line number.
-            3,                                          // Column number.
-            "  Partitions: %d partitions, %s left",     // Format string.
+            modal,
+            8, 3,
+            "  Partitions: %d partitions, %s left",
             store->partition_count,
             free_str
         );

@@ -6,20 +6,18 @@
  */
 #define STEPS_MAX_OPTIONS 32
 
-/**
- * Represents a single installation step.
- */
-typedef struct {
+/** A type representing a single installation step. */
+typedef struct
+{
     const char *name;
     const char **content;
     int content_lines;
     const char *footer;
 } Step;
 
-/**
- * Represents a selectable option in a step.
- */
-typedef struct {
+/** A type representing a selectable option in a step. */
+typedef struct
+{
     char value[128];
     char label[256];
 } StepOption;

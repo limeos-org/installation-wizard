@@ -1,9 +1,6 @@
 #pragma once
 #include "../all.h"
 
-/** Forward declaration to avoid circular includes. */
-struct Partition;
-
 /**
  * Formats a byte count into a human-readable size string.
  *

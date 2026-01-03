@@ -6,7 +6,7 @@ int run_install(WINDOW *modal)
 
     // Clear the modal window.
     clear_modal(modal);
-    
+
     // Display installation start message.
     mvwprintw(modal, 2, 3, "Installing LimeOS...");
     wrefresh(modal);

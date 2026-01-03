@@ -1,6 +1,6 @@
 /**
- * This file contains unit tests for the partitioning functionality
- * of the installer (e.g., create_partitions behavior).
+ * This code is responsible for testing the partitioning functionality,
+ * including partition creation, formatting, and mounting behavior.
  */
 
 #include "../../all.h"

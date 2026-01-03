@@ -13,28 +13,32 @@
  */
 #define FORM_DESCRIPTION_SHIFT 4
 
-/** Column alignment options. */
-typedef enum {
+/** A type representing column alignment options. */
+typedef enum
+{
     TABLE_ALIGN_LEFT,
     TABLE_ALIGN_RIGHT,
     TABLE_ALIGN_CENTER
 } TableAlign;
 
-/** Defines a single table column. */
-typedef struct {
+/** A type representing a single table column definition. */
+typedef struct
+{
     const char *header;
     int width;
     TableAlign align;
 } TableColumn;
 
-/** Represents a table row with cells. */
-typedef struct {
+/** A type representing a table row with cells. */
+typedef struct
+{
     char cells[6][64];
     int cell_count;
 } TableRow;
 
-/** Form field for spinner-type input. */
-typedef struct {
+/** A type representing a form field for spinner-type input. */
+typedef struct
+{
     const char *label;
     const char **options;
     int option_count;
@@ -44,8 +48,9 @@ typedef struct {
     int warning;
 } FormField;
 
-/** Result of form input handling. */
-typedef enum {
+/** A type representing the result of form input handling. */
+typedef enum
+{
     FORM_CONTINUE,
     FORM_SUBMIT,
     FORM_CANCEL
