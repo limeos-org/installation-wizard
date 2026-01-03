@@ -301,7 +301,9 @@ Additionally, these guidelines enforce the usage of **directive** and
 Directive comments are inline annotations written in a _directive_ tone that
 describe each logical step within function implementations. They transform code
 into a readable narrative by pairing language with code, allowing reviewers and
-maintainers to understand the algorithm without parsing every line.
+maintainers to understand the algorithm without parsing every line. This is
+stricter than most C projects; expect more time spent on readability than raw
+velocity.
 
 **Template**
 
@@ -797,6 +799,11 @@ else
 
    _**Why?**_ Allman style visually aligns braces, making block boundaries easy
    to scan and reducing errors when modifying code.
+
+2. Indentation **must** use 4 spaces (no tabs).
+
+   _**Why?**_ Spaces render consistently across editors and tools; 4 spaces
+   provide clear visual hierarchy without excessive horizontal drift.
 
 &nbsp;
 
