@@ -718,14 +718,16 @@ and understand code components.
    _**Why?**_ Modular organization groups related code, making navigation
    intuitive.
 
-4. Source files (`.c`) and header files (`.h`) **must** share the same name
-   and directory.
+4. When a `.c` file has a corresponding interface header, they **must** share
+   the same base name and directory.
 
    _**Why?**_ Paired naming makes finding the interface for any implementation
    trivial.
 
-   _**Exception:**_ `main.c` **may** omit a corresponding header file, as entry
-   points typically don't expose APIs to other modules.
+   _**Exception:**_ Unpaired `.c` or `.h` files **may** exist for legitimate
+   patterns (e.g., `main.c` without a header, test files, header-only utilities,
+   aggregator headers like `all.h`, platform-specific headers, or generated
+   headers).
 
 **Example**
 
