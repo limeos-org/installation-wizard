@@ -208,6 +208,17 @@ This subsection defines conventions for writing clear and consistent commit
 messages. Well-written commit messages make project history easier to navigate
 and simplify debugging with tools like `git bisect`.
 
+**Template**
+
+```
+[VERB:ACTION]
+```
+
+Where:
+
+- `VERB` - An imperative verb (e.g., "Add", "Fix", "Remove", "Update").
+- `ACTION` - What the commit accomplishes.
+
 To write a commit message, think: "This commit will ..." and complete the
 sentence. Drop the filler words and use the completion as your subject line.
 
@@ -913,6 +924,12 @@ Where:
 
    _**Why?**_ Without the note, readers won't know rules conflict or stack;
    explicit precedence prevents misapplication.
+
+5. Convention subsections **must** include **Template**, **Example**, and
+   **Rules** sections.
+
+   _**Why?**_ Templates provide structure, examples demonstrate usage, and
+   rules codify requirements; together they make conventions actionable.
 
    _**Exception:**_ **Template** and **Example** sections **may** be omitted
    when the rules are self-evident, as forcing examples on simple rule sets
