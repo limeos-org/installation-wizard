@@ -56,6 +56,11 @@
 #define CUSTOM_COLOR_PAIR_ERROR_NOTE   11
 
 /**
+ * Returns non-zero if terminal supports extended colors (16+).
+ */
+int ui_has_extended_colors(void);
+
+/**
  * Initializes the ncurses library and configures color pairs.
  */
 void initialize_ui(void);

@@ -65,11 +65,17 @@ void print_dim(WINDOW *window, int y, int x, const char *format, ...)
     va_list arguments;
     va_start(arguments, format);
 
-    // Print text with dimmed styling.
-    wattron(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+    // Print text with dimmed styling (use A_DIM on 8-color terminals).
+    int attrs = COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM);
+    if (!ui_has_extended_colors())
+    {
+        attrs |= A_DIM;
+    }
+
+    wattron(window, attrs);
     wmove(window, y, x);
     vw_printw(window, format, arguments);
-    wattroff(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+    wattroff(window, attrs);
 
     va_end(arguments);
 }
@@ -318,7 +324,12 @@ void render_form(
         }
         if (field->readonly)
         {
-            wattron(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+            int dim_attrs = COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM);
+            if (!ui_has_extended_colors())
+            {
+                dim_attrs |= A_DIM;
+            }
+            wattron(window, dim_attrs);
         }
 
         // Render value with arrows for navigable fields.
@@ -338,7 +349,12 @@ void render_form(
         // Disable field styling after rendering.
         if (field->readonly)
         {
-            wattroff(window, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+            int dim_attrs = COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM);
+            if (!ui_has_extended_colors())
+            {
+                dim_attrs |= A_DIM;
+            }
+            wattroff(window, dim_attrs);
         }
         if (is_focused && !field->readonly)
         {
@@ -419,6 +435,13 @@ FormResult handle_form_key(
 
 void render_footer(WINDOW *modal, const char **items)
 {
+    // Compute dim attributes (use A_DIM on 8-color terminals).
+    int dim_attrs = COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM);
+    if (!ui_has_extended_colors())
+    {
+        dim_attrs |= A_DIM;
+    }
+
     // Iterate through footer items and render each one.
     int x = 3;
     for (int item_index = 0; items[item_index] != NULL; item_index++)
@@ -447,9 +470,9 @@ void render_footer(WINDOW *modal, const char **items)
                 else
                 {
                     // Render rest in gray when no closing bracket found.
-                    wattron(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+                    wattron(modal, dim_attrs);
                     mvwprintw(modal, MODAL_HEIGHT - 2, x, "%s", cursor);
-                    wattroff(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+                    wattroff(modal, dim_attrs);
                     x += strlen(cursor);
                     break;
                 }
@@ -459,9 +482,9 @@ void render_footer(WINDOW *modal, const char **items)
                 // Find next '[' or end of string, render in gray.
                 const char *next = strchr(cursor, '[');
                 int length = next ? (next - cursor) : (int)strlen(cursor);
-                wattron(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+                wattron(modal, dim_attrs);
                 mvwprintw(modal, MODAL_HEIGHT - 2, x, "%.*s", length, cursor);
-                wattroff(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_DIM));
+                wattroff(modal, dim_attrs);
                 x += length;
                 cursor += length;
             }
