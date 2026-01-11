@@ -22,7 +22,6 @@
 #include "utils/disk.h"
 #include "utils/dependencies.h"
 #include "operations/log.h"
-#include "operations/progress.h"
 #include "operations/install.h"
 #include "operations/partitions.h"
 #include "operations/rootfs.h"
@@ -38,5 +37,6 @@
 #include "steps/partition/table.h"
 #include "steps/partition/dialogs.h"
 #include "steps/partition/partition.h"
-#include "steps/confirm.h"
+#include "steps/confirm/confirm.h"
+#include "steps/confirm/progress.h"
 

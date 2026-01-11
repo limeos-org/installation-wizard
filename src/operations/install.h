@@ -1,5 +1,41 @@
 #pragma once
-#include "../all.h"
+
+/**
+ * Installation progress events.
+ */
+typedef enum {
+    INSTALL_START,
+    INSTALL_STEP_BEGIN,
+    INSTALL_STEP_OK,
+    INSTALL_STEP_FAIL,
+    INSTALL_COMPLETE,
+    INSTALL_AWAIT_REBOOT
+} InstallEvent;
+
+/**
+ * Installation steps.
+ */
+typedef enum {
+    STEP_PARTITIONS,
+    STEP_ROOTFS,
+    STEP_BOOTLOADER,
+    STEP_LOCALE
+} InstallStep;
+
+/**
+ * Progress callback function type.
+ *
+ * @param event The type of progress event.
+ * @param step Which installation step (for STEP_* events).
+ * @param error_code Error code (for INSTALL_STEP_FAIL).
+ * @param context User-provided context data.
+ */
+typedef void (*install_progress_cb)(
+    InstallEvent event,
+    InstallStep step,
+    int error_code,
+    void *context
+);
 
 /**
  * Runs the full installation process using settings from the global store.
