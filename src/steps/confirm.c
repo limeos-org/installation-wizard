@@ -94,8 +94,8 @@ int run_confirmation_step(WINDOW *modal)
         {
             has_boot_partition = 1;
 
-            // Check if BIOS GRUB partition is at least 512MB.
-            if (store->partitions[i].size_bytes < 512ULL * 1000000)
+            // Check if BIOS GRUB partition is at least 128MB.
+            if (store->partitions[i].size_bytes < 128ULL * 1000000)
             {
                 boot_partition_too_small = 1;
             }
@@ -167,8 +167,8 @@ int run_confirmation_step(WINDOW *modal)
         else
         {
             render_error(modal, 10, 3,
-                "BIOS GRUB partition must be at least 512MB.\n"
-                "1GB is recommended. Go back and resize it."
+                "BIOS GRUB partition must be at least 128MB.\n"
+                "512MB is recommended. Go back and resize it."
             );
         }
 
