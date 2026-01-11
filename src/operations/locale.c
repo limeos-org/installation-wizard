@@ -1,5 +1,9 @@
+/**
+ * This code is responsible for configuring the system locale settings
+ * by enabling the selected locale and generating locale data.
+ */
+
 #include "../all.h"
-#include <ctype.h>
 
 static int is_valid_locale(const char *locale)
 {
@@ -49,7 +53,7 @@ int configure_locale(void)
     // Enable the selected locale in /etc/locale.gen.
     // This uncomments the line matching the locale.
     snprintf(cmd, sizeof(cmd),
-        "sed -i '/^# %s/s/^# //' /mnt/etc/locale.gen >/dev/null 2>&1",
+        "sed -i '/^# %s/s/^# //' /mnt/etc/locale.gen >>" INSTALL_LOG_PATH " 2>&1",
         store->locale);
     if (run_command(cmd) != 0)
     {
@@ -57,7 +61,7 @@ int configure_locale(void)
     }
 
     // Generate locales inside the chroot.
-    if (run_command("chroot /mnt /usr/sbin/locale-gen >/dev/null 2>&1") != 0)
+    if (run_command("chroot /mnt /usr/sbin/locale-gen >>" INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }

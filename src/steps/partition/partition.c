@@ -86,7 +86,7 @@ int run_partition_step(WINDOW *modal)
         wrefresh(modal);
 
         // Handle user input.
-        int key = wgetch(modal);
+        int key = getch();
         switch (key)
         {
             case KEY_UP:

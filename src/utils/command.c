@@ -6,6 +6,12 @@
 #include "../all.h"
 
 static FILE *dry_run_log = NULL;
+static CommandPollCallback poll_callback = NULL;
+
+void set_command_poll_callback(CommandPollCallback callback)
+{
+    poll_callback = callback;
+}
 
 int run_command(const char *command)
 {
@@ -29,8 +35,55 @@ int run_command(const char *command)
         return 0;
     }
 
-    // Execute command using system shell.
-    return system(command);
+    // If no poll callback, use simple blocking execution.
+    if (!poll_callback)
+    {
+        return system(command);
+    }
+
+    // Fork and exec to allow polling for input during execution.
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        // Fork failed, fall back to system().
+        return system(command);
+    }
+
+    if (pid == 0)
+    {
+        // Child process: execute the command.
+        execl("/bin/sh", "sh", "-c", command, (char *)NULL);
+        _exit(127); // exec failed
+    }
+
+    // Parent process: poll for completion while checking input.
+    int status;
+    while (1)
+    {
+        pid_t result = waitpid(pid, &status, WNOHANG);
+        if (result == pid)
+        {
+            // Child finished.
+            if (WIFEXITED(status))
+            {
+                return WEXITSTATUS(status);
+            }
+            return -1; // Abnormal termination
+        }
+        if (result < 0)
+        {
+            return -1; // waitpid error
+        }
+
+        // Child still running, invoke poll callback.
+        if (poll_callback)
+        {
+            poll_callback();
+        }
+
+        // Small delay to avoid busy-waiting.
+        usleep(50000); // 50ms
+    }
 }
 
 void close_dry_run_log(void)

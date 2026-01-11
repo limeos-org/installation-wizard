@@ -1,3 +1,9 @@
+/**
+ * This code is responsible for unmounting all filesystems that were mounted
+ * during the installation process, ensuring proper cleanup on completion
+ * or failure.
+ */
+
 #include "../all.h"
 
 int cleanup_mounts(void)
@@ -35,7 +41,7 @@ int cleanup_mounts(void)
         {
             // Disable swap.
             char cmd[256];
-            snprintf(cmd, sizeof(cmd), "swapoff %s >/dev/null 2>&1", partition_device);
+            snprintf(cmd, sizeof(cmd), "swapoff '%s' >/dev/null 2>&1", partition_device);
             run_command(cmd);
         }
         else if (strcmp(partition->mount_point, "/") != 0 &&
@@ -45,7 +51,7 @@ int cleanup_mounts(void)
             char mount_path[256];
             snprintf(mount_path, sizeof(mount_path), "/mnt%s", partition->mount_point);
             char cmd[256];
-            snprintf(cmd, sizeof(cmd), "umount %s >/dev/null 2>&1", mount_path);
+            snprintf(cmd, sizeof(cmd), "umount '%s' >/dev/null 2>&1", mount_path);
             run_command(cmd);
         }
     }

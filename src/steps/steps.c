@@ -7,7 +7,7 @@
 
 #define MAX_VISIBLE_OPTIONS MODAL_MAX_VISIBLE
 
-void display_step(WINDOW *modal, int step_number, Step *step)
+void display_step(WINDOW *modal, int step_number, const Step *step)
 {
     // Clear previous step content before drawing.
     clear_modal(modal);
@@ -35,9 +35,11 @@ void display_step(WINDOW *modal, int step_number, Step *step)
 
 int await_step_input(WINDOW *modal)
 {
+    (void)modal; // Input now read from stdscr via getch().
+
     // Wait for Enter or 'q' key, ignoring all other input.
     int key;
-    while ((key = wgetch(modal)) != '\n' && key != 'q')
+    while ((key = getch()) != '\n' && key != 'q')
     {
         // Continue waiting for valid input.
     }
@@ -47,7 +49,7 @@ int await_step_input(WINDOW *modal)
 }
 
 void render_step_options(
-    WINDOW *modal, StepOption *options, int count, int selected,
+    WINDOW *modal, const StepOption *options, int count, int selected,
     int start_y, int scroll_offset, int max_visible
 )
 {
@@ -119,7 +121,7 @@ void render_step_options(
 
 int run_selection_step(
     WINDOW *modal, const char *title, int step_number,
-    const char *description, StepOption *options, int count,
+    const char *description, const StepOption *options, int count,
     int *out_selected, int allow_back
 )
 {
@@ -170,7 +172,7 @@ int run_selection_step(
         wrefresh(modal);
 
         // Handle user input.
-        int key = wgetch(modal);
+        int key = getch();
         switch (key)
         {
             case KEY_UP:

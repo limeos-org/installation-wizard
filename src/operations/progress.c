@@ -1,3 +1,8 @@
+/**
+ * This code is responsible for providing human-readable names for
+ * installation steps used in progress display.
+ */
+
 #include "../all.h"
 
 const char *get_install_step_name(InstallStep step)

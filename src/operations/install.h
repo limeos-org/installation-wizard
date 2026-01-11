@@ -1,5 +1,5 @@
 #pragma once
-#include "progress.h"
+#include "../all.h"
 
 /**
  * Runs the full installation process using settings from the global store.

@@ -1,7 +1,7 @@
 /**
  * This code is responsible for providing reusable UI building blocks such as
  * scrollbars, tables, forms, and styled text helpers. Note that this file is
- * named "interfaces" rather than "components" because LimeOS uses "components"
+ * named "elements" rather than "components" because LimeOS uses "components"
  * to refer to extendable pieces of software within the operating system.
  */
 
@@ -96,8 +96,8 @@ void print_selected(WINDOW *window, int y, int x, const char *format, ...)
 }
 
 void render_table(
-    WINDOW *window, int y, int x, TableColumn *columns, int column_count,
-    TableRow *rows, int row_count,
+    WINDOW *window, int y, int x, const TableColumn *columns, int column_count,
+    const TableRow *rows, int row_count,
     int selected, int scroll_offset, int max_visible
 )
 {
@@ -297,7 +297,7 @@ void render_error(WINDOW *window, int y, int x, const char *text)
 
 void render_form(
     WINDOW *window, int y, int x, int label_width,
-    FormField *fields, int field_count, int focused
+    const FormField *fields, int field_count, int focused
 )
 {
     // Render each field, with description below focused field.
@@ -310,7 +310,7 @@ void render_form(
             row_y += FORM_DESCRIPTION_SHIFT;
         }
 
-        FormField *field = &fields[field_index];
+        const FormField *field = &fields[field_index];
         int is_focused = (field_index == focused);
 
         // Render label.

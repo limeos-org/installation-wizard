@@ -174,7 +174,7 @@ static int run_partition_form(
         wrefresh(modal);
 
         // Handle user input.
-        int key = wgetch(modal);
+        int key = getch();
         FormResult result = handle_form_key(key, fields, FIELD_COUNT, &focused);
 
         // Update indices from form fields after key handling.
@@ -224,7 +224,7 @@ static int select_partition(
         wrefresh(modal);
 
         // Handle user input for partition selection.
-        int key = wgetch(modal);
+        int key = getch();
         if (key == KEY_UP && selected > 0)
         {
             // Move selection up.
@@ -275,7 +275,7 @@ int add_partition_dialog(
         wrefresh(modal);
 
         // Wait for user to acknowledge the error.
-        while (wgetch(modal) != '\n');
+        while (getch() != '\n');
         return 0;
     }
 
@@ -299,7 +299,7 @@ int add_partition_dialog(
         wrefresh(modal);
 
         // Wait for user to acknowledge the error.
-        while (wgetch(modal) != '\n');
+        while (getch() != '\n');
         return 0;
     }
 

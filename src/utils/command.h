@@ -24,3 +24,14 @@ int run_command(const char *command);
  * the log file properly.
  */
 void close_dry_run_log(void);
+
+/** Callback invoked during command execution for UI updates. */
+typedef void (*CommandPollCallback)(void);
+
+/**
+ * Sets a callback to be invoked during command execution.
+ * The callback can handle input polling and UI updates.
+ *
+ * @param callback Function to call during polling, or NULL to disable.
+ */
+void set_command_poll_callback(CommandPollCallback callback);
