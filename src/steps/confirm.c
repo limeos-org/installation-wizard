@@ -76,6 +76,8 @@ int run_confirmation_step(WINDOW *modal)
 
     // Check for required boot partition based on boot mode.
     int has_boot_partition = 0;
+    int bios_grub_too_small = 0;
+    unsigned long long bios_grub_size = 0;
     for (int i = 0; i < store->partition_count; i++)
     {
         if (is_uefi && store->partitions[i].flag_esp)
@@ -86,12 +88,20 @@ int run_confirmation_step(WINDOW *modal)
         if (!is_uefi && store->partitions[i].flag_bios_grub)
         {
             has_boot_partition = 1;
+            bios_grub_size = store->partitions[i].size_bytes;
+
+            // Check if BIOS GRUB partition is at least 512MB.
+            if (bios_grub_size < 512ULL * 1000000)
+            {
+                bios_grub_too_small = 1;
+            }
             break;
         }
     }
 
     // Determine if installation can proceed.
-    int can_install = has_root && !has_duplicate && has_boot_partition;
+    int can_install = has_root && !has_duplicate && has_boot_partition
+        && !bios_grub_too_small;
 
     // Render the appropriate message based on validation.
     if (has_duplicate)
@@ -135,6 +145,18 @@ int run_confirmation_step(WINDOW *modal)
                 "Add: Size=8MB, Mount=none, Flags=bios_grub"
             );
         }
+
+        // Display navigation footer without install option.
+        const char *footer[] = {"[Esc] Back", NULL};
+        render_footer(modal, footer);
+    }
+    else if (bios_grub_too_small)
+    {
+        // Display error about insufficient BIOS GRUB partition size.
+        render_error(modal, 10, 3,
+            "BIOS GRUB partition must be at least 512MB.\n"
+            "1GB is recommended. Go back and resize it."
+        );
 
         // Display navigation footer without install option.
         const char *footer[] = {"[Esc] Back", NULL};
