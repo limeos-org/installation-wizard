@@ -76,24 +76,28 @@ int run_confirmation_step(WINDOW *modal)
 
     // Check for required boot partition based on boot mode.
     int has_boot_partition = 0;
-    int bios_grub_too_small = 0;
-    unsigned long long bios_grub_size = 0;
+    int boot_partition_too_small = 0;
     for (int i = 0; i < store->partition_count; i++)
     {
         if (is_uefi && store->partitions[i].flag_esp)
         {
             has_boot_partition = 1;
+
+            // Check if ESP is at least 512MB.
+            if (store->partitions[i].size_bytes < 512ULL * 1000000)
+            {
+                boot_partition_too_small = 1;
+            }
             break;
         }
         if (!is_uefi && store->partitions[i].flag_bios_grub)
         {
             has_boot_partition = 1;
-            bios_grub_size = store->partitions[i].size_bytes;
 
             // Check if BIOS GRUB partition is at least 512MB.
-            if (bios_grub_size < 512ULL * 1000000)
+            if (store->partitions[i].size_bytes < 512ULL * 1000000)
             {
-                bios_grub_too_small = 1;
+                boot_partition_too_small = 1;
             }
             break;
         }
@@ -101,7 +105,7 @@ int run_confirmation_step(WINDOW *modal)
 
     // Determine if installation can proceed.
     int can_install = has_root && !has_duplicate && has_boot_partition
-        && !bios_grub_too_small;
+        && !boot_partition_too_small;
 
     // Render the appropriate message based on validation.
     if (has_duplicate)
@@ -150,13 +154,23 @@ int run_confirmation_step(WINDOW *modal)
         const char *footer[] = {"[Esc] Back", NULL};
         render_footer(modal, footer);
     }
-    else if (bios_grub_too_small)
+    else if (boot_partition_too_small)
     {
-        // Display error about insufficient BIOS GRUB partition size.
-        render_error(modal, 10, 3,
-            "BIOS GRUB partition must be at least 512MB.\n"
-            "1GB is recommended. Go back and resize it."
-        );
+        // Display error about insufficient boot partition size.
+        if (is_uefi)
+        {
+            render_error(modal, 10, 3,
+                "EFI System Partition must be at least 512MB.\n"
+                "Go back and resize it."
+            );
+        }
+        else
+        {
+            render_error(modal, 10, 3,
+                "BIOS GRUB partition must be at least 512MB.\n"
+                "1GB is recommended. Go back and resize it."
+            );
+        }
 
         // Display navigation footer without install option.
         const char *footer[] = {"[Esc] Back", NULL};
