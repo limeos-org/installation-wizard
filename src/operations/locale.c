@@ -1,5 +1,9 @@
+/**
+ * This code is responsible for configuring the system locale settings
+ * by enabling the selected locale and generating locale data.
+ */
+
 #include "../all.h"
-#include <ctype.h>
 
 static int is_valid_locale(const char *locale)
 {
@@ -15,8 +19,10 @@ static int is_valid_locale(const char *locale)
         return 0;
     }
 
-    // Validate characters, ensuring at least one underscore is present.
-    // Locale must contain an underscore separating language and region.
+    // Validate characters: only allow alphanumeric, underscore, dot, hyphen, 
+    // and at-sign. These are the only characters valid in locale identifiers, 
+    // ensuring both semantic validity and shell/sed safety without needing
+    // additional escaping.
     int has_underscore = 0;
     for (size_t i = 0; i < len; i++)
     {
@@ -38,7 +44,8 @@ int configure_locale(void)
 {
     Store *store = get_store();
 
-    // Validate locale to prevent shell injection.
+    // Validate locale format and characters. The character validation ensures 
+    // shell/sed safety for this constrained input.
     if (!is_valid_locale(store->locale))
     {
         return -1;
@@ -49,7 +56,7 @@ int configure_locale(void)
     // Enable the selected locale in /etc/locale.gen.
     // This uncomments the line matching the locale.
     snprintf(cmd, sizeof(cmd),
-        "sed -i '/^# %s/s/^# //' /mnt/etc/locale.gen >/dev/null 2>&1",
+        "sed -i '/^# %s/s/^# //' /mnt/etc/locale.gen >>" INSTALL_LOG_PATH " 2>&1",
         store->locale);
     if (run_command(cmd) != 0)
     {
@@ -57,7 +64,7 @@ int configure_locale(void)
     }
 
     // Generate locales inside the chroot.
-    if (run_command("chroot /mnt /usr/sbin/locale-gen >/dev/null 2>&1") != 0)
+    if (run_command("chroot /mnt /usr/sbin/locale-gen >>" INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }

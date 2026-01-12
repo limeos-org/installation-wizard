@@ -29,7 +29,7 @@ typedef struct
  * @param step_number The current step number (1-indexed).
  * @param step The step data to display.
  */
-void display_step(WINDOW *modal, int step_number, Step *step);
+void display_step(WINDOW *modal, int step_number, const Step *step);
 
 /**
  * Waits for user input to proceed or quit.
@@ -53,7 +53,7 @@ int await_step_input(WINDOW *modal);
  * @param max_visible Maximum number of options to display at once.
  */
 void render_step_options(
-    WINDOW *modal, StepOption *options, int count, int selected, int start_y,
+    WINDOW *modal, const StepOption *options, int count, int selected, int start_y,
     int scroll_offset, int max_visible
 );
 
@@ -74,5 +74,5 @@ void render_step_options(
  */
 int run_selection_step(
     WINDOW *modal, const char *title, int step_number, const char *description,
-    StepOption *options, int count, int *out_selected, int allow_back
+    const StepOption *options, int count, int *out_selected, int allow_back
 );

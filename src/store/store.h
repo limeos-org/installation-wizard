@@ -42,6 +42,7 @@ typedef struct Partition {
 typedef struct {
     int current_step;
     int dry_run;
+    int force_uefi; // 0 = auto-detect, 1 = force UEFI, -1 = force BIOS
     char locale[STORE_MAX_LOCALE_LEN];
     char disk[STORE_MAX_DISK_LEN];
     Partition partitions[STORE_MAX_PARTITIONS];

@@ -82,7 +82,7 @@ void render_scrollbar(
 void print_bold(WINDOW *window, int y, int x, const char *format, ...);
 
 /**
- * Prints dimmed (gray) text at the specified position. Uses color pair 3.
+ * Prints dimmed (gray) text at the specified position.
  *
  * @param window The ncurses window to draw in.
  * @param y Y coordinate.
@@ -92,8 +92,7 @@ void print_bold(WINDOW *window, int y, int x, const char *format, ...);
 void print_dim(WINDOW *window, int y, int x, const char *format, ...);
 
 /**
- * Prints text with the selected indicator style (bold dodger blue). Uses
- * color pair 6 with bold.
+ * Prints text with the selected indicator style (bold dodger blue).
  *
  * @param window The ncurses window to draw in.
  * @param y Y coordinate.
@@ -117,8 +116,8 @@ void print_selected(WINDOW *window, int y, int x, const char *format, ...);
  * @param max_visible Maximum visible rows (excluding header).
  */
 void render_table(
-    WINDOW *window, int y, int x, TableColumn *columns, int column_count,
-    TableRow *rows, int row_count, int selected, int scroll_offset,
+    WINDOW *window, int y, int x, const TableColumn *columns, int column_count,
+    const TableRow *rows, int row_count, int selected, int scroll_offset,
     int max_visible
 );
 
@@ -134,7 +133,7 @@ void render_table(
  * @param focused Index of currently focused field.
  */
 void render_form(
-    WINDOW *window, int y, int x, int label_width, FormField *fields,
+    WINDOW *window, int y, int x, int label_width, const FormField *fields,
     int field_count, int focused
 );
 

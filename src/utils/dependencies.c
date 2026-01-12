@@ -22,7 +22,7 @@ int is_library_available(const char *name)
 int is_command_available(const char *name)
 {
     // Get PATH environment variable.
-    char *path_env = getenv("PATH");
+    const char *path_env = getenv("PATH");
     if (path_env == NULL)
     {
         return 0;

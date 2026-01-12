@@ -1,5 +1,16 @@
 #pragma once
 
+/*
+ * semistatic: expands to 'static' normally, or nothing when -DTESTING is set.
+ * This exposes functions for unit testing while keeping them static in 
+ * production. Declare test-accessible functions in tests/all.h.
+ */
+#ifdef TESTING
+#define semistatic
+#else
+#define semistatic static
+#endif
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
@@ -21,21 +32,22 @@
 #include "utils/command.h"
 #include "utils/disk.h"
 #include "utils/dependencies.h"
-#include "install/progress.h"
+#include "operations/log.h"
+#include "operations/install.h"
+#include "operations/partitions.h"
+#include "operations/rootfs.h"
+#include "operations/bootloader.h"
+#include "operations/locale.h"
+#include "operations/cleanup.h"
 #include "ui/ui.h"
 #include "ui/modal.h"
-#include "ui/interfaces.h"
-#include "ui/install.h"
+#include "ui/elements.h"
 #include "steps/steps.h"
 #include "steps/locale.h"
 #include "steps/disk.h"
 #include "steps/partition/table.h"
 #include "steps/partition/dialogs.h"
 #include "steps/partition/partition.h"
-#include "steps/confirm.h"
-#include "install/install.h"
-#include "install/partitions.h"
-#include "install/rootfs.h"
-#include "install/bootloader.h"
-#include "install/locale.h"
-#include "install/cleanup.h"
+#include "steps/confirm/confirm.h"
+#include "steps/confirm/progress.h"
+

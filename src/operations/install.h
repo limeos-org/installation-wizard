@@ -38,10 +38,16 @@ typedef void (*install_progress_cb)(
 );
 
 /**
- * Returns the display name for an installation step.
+ * Runs the full installation process using settings from the global store.
  *
- * @param step The installation step.
+ * @param progress_cb Callback for progress updates (can be NULL for silent 
+ * mode).
+ * @param context User data passed to callback.
  *
- * @return The human-readable name for the step.
+ * @return - `0` - on success.
+ * @return - `-1` - if partitioning fails.
+ * @return - `-2` - if rootfs extraction fails.
+ * @return - `-3` - if bootloader setup fails.
+ * @return - `-4` - if locale configuration fails.
  */
-const char *get_install_step_name(InstallStep step);
+int run_install(install_progress_cb progress_cb, void *context);

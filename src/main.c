@@ -71,10 +71,12 @@ int main(int argc, char *argv[])
     // A loop that runs throughout the entire wizard process and waits for user
     // input at each step, allowing back-and-forth navigation between steps.
     int step = 1;
-    while (step <= 4) {
+    while (step <= 4)
+    {
         int result = 0;
 
-        switch (step) {
+        switch (step)
+        {
             case 1:
                 result = run_locale_step(modal);
                 break;
@@ -89,10 +91,13 @@ int main(int argc, char *argv[])
                 break;
         }
 
-        if (result) {
-            step++; // Move to next step.
-        } else if (step > 1) {
-            step--; // Go back to previous step.
+        if (result)
+        {
+            step++;
+        }
+        else if (step > 1)
+        {
+            step--;
         }
         // If step == 1 and result == 0, stay on step 1.
     }
