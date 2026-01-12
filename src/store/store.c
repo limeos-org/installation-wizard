@@ -12,7 +12,8 @@ static Store store = {
     .locale = "",
     .disk = "",
     .partitions = {{0}},
-    .partition_count = 0
+    .partition_count = 0,
+    .partition_method = METHOD_MANUAL
 };
 
 Store *get_store(void)
@@ -34,4 +35,5 @@ void reset_store(void)
     // Clear partition configuration.
     memset(store.partitions, 0, sizeof(store.partitions));
     store.partition_count = 0;
+    store.partition_method = METHOD_MANUAL;
 }

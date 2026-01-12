@@ -44,10 +44,12 @@
 #include "ui/elements.h"
 #include "steps/steps.h"
 #include "steps/locale.h"
+#include "steps/method.h"
 #include "steps/disk.h"
 #include "steps/partition/table.h"
 #include "steps/partition/dialogs.h"
 #include "steps/partition/partition.h"
+#include "steps/partition/auto.h"
 #include "steps/confirm/confirm.h"
 #include "steps/confirm/progress.h"
 

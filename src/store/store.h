@@ -38,6 +38,12 @@ typedef struct Partition {
     int flag_bios_grub;
 } Partition;
 
+/** Partition method types. */
+typedef enum {
+    METHOD_MANUAL,  // Manual partitioning (current behavior)
+    METHOD_EASY     // Automatic partitioning
+} PartitionMethod;
+
 /** Global store containing user selections and installation settings. */
 typedef struct {
     int current_step;
@@ -47,6 +53,7 @@ typedef struct {
     char disk[STORE_MAX_DISK_LEN];
     Partition partitions[STORE_MAX_PARTITIONS];
     int partition_count;
+    PartitionMethod partition_method; // Easy or Manual partitioning
 } Store;
 
 /**

@@ -5,7 +5,7 @@
 
 #include "../../all.h"
 
-#define PARTITION_STEP_NUM 3
+#define PARTITION_STEP_NUM 4
 
 int run_partition_step(WINDOW *modal)
 {
