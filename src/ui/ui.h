@@ -22,8 +22,8 @@
 /** Index for custom red color. */
 #define CUSTOM_COLOR_RED           15
 
-/** Index for custom purple color. */
-#define CUSTOM_COLOR_PURPLE        14
+/** Index for custom gold color. */
+#define CUSTOM_COLOR_GOLD          14
 
 /** Color pair for main UI elements. */
 #define CUSTOM_COLOR_PAIR_MAIN         1

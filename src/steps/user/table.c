@@ -92,7 +92,7 @@ void render_user_table(
                 wattroff(modal, A_REVERSE);
             }
 
-            // Render purple asterisk for primary user.
+            // Render asterisk for primary user.
             if (user_index == 0)
             {
                 int marker_color = (user_index % 2 == 0)
