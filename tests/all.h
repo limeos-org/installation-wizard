@@ -40,6 +40,9 @@ BootValidationError validate_boot_config(
     Store *store, FirmwareType firmware, DiskLabel disk_label
 );
 
+/* src/steps/user/dialogs.c */
+int has_duplicate_username(Store *store, const char *username, int edit_index);
+
 /* src/steps/partition/dialogs.c */
 #define SIZE_COUNT 19
 #define MOUNT_COUNT 6

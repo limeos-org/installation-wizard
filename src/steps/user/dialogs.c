@@ -27,6 +27,7 @@ typedef struct
     int spinner_current;
     const char *description;
     int description_is_warning;
+    int description_is_error;
 } TextField;
 
 static void render_text_form(
@@ -118,7 +119,11 @@ static void render_text_form(
         // Render description below focused field.
         if (is_focused && field->description != NULL)
         {
-            if (field->description_is_warning)
+            if (field->description_is_error)
+            {
+                render_error(window, row_y + 2, x, field->description);
+            }
+            else if (field->description_is_warning)
             {
                 render_warning(window, row_y + 2, x, field->description);
             }
@@ -233,9 +238,29 @@ static int is_valid_username(const char *username)
     return 1;
 }
 
+semistatic int has_duplicate_username(Store *store, const char *username, int edit_index)
+{
+    // Check all users for duplicates.
+    for (int i = 0; i < store->user_count; i++)
+    {
+        // Skip the user being edited.
+        if (i == edit_index)
+        {
+            continue;
+        }
+
+        if (strcmp(store->users[i].username, username) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static int run_user_form(
     WINDOW *modal, const char *title, User *user, int is_new_user,
-    int is_primary_user
+    int is_primary_user, Store *store, int edit_index
 )
 {
     // Copy current user data to local buffers.
@@ -301,6 +326,17 @@ static int run_user_form(
 
     while (1)
     {
+        // Check for duplicate username.
+        int duplicate = has_duplicate_username(store, username_buffer, edit_index);
+
+        // Update username field description based on duplicate status.
+        fields[TEXT_FIELD_USERNAME].description = duplicate
+            ? "Another user already has this username.\n"
+              "Choose a different username."
+            : "Login name for the user account.\n"
+              "Lowercase letters, digits, underscores, hyphens.";
+        fields[TEXT_FIELD_USERNAME].description_is_error = duplicate;
+
         clear_modal(modal);
         wattron(modal, A_BOLD);
         mvwprintw(modal, 2, 3, "%s", title);
@@ -325,7 +361,7 @@ static int run_user_form(
 
         if (key == '\n' || key == KEY_ENTER)
         {
-            if (valid_username && valid_password)
+            if (valid_username && valid_password && !duplicate)
             {
                 strncpy(user->username, username_buffer, sizeof(user->username) - 1);
                 user->username[sizeof(user->username) - 1] = '\0';
@@ -467,7 +503,9 @@ int edit_user_dialog(WINDOW *modal, Store *store)
     snprintf(title, sizeof(title), "Edit User %d", selected + 1);
 
     // Pass is_primary_user flag for the first user.
-    return run_user_form(modal, title, &store->users[selected], 0, selected == 0);
+    return run_user_form(
+        modal, title, &store->users[selected], 0, selected == 0, store, selected
+    );
 }
 
 int add_user_dialog(WINDOW *modal, Store *store)
@@ -489,7 +527,7 @@ int add_user_dialog(WINDOW *modal, Store *store)
 
     // Run the user form and return if cancelled.
     // New users are never the primary user.
-    if (!run_user_form(modal, "Add User", &new_user, 1, 0))
+    if (!run_user_form(modal, "Add User", &new_user, 1, 0, store, -1))
     {
         return 0;
     }
