@@ -13,7 +13,7 @@
 #define COL_WIDTH_SIZE   10
 
 /** The column width for mount point. */
-#define COL_WIDTH_MOUNT  8
+#define COL_WIDTH_MOUNT  10
 
 /** The column width for filesystem type. */
 #define COL_WIDTH_FS     5
