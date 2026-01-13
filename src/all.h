@@ -26,7 +26,6 @@
 #include <ctype.h>
 #include <dlfcn.h>
 #include <sys/mount.h>
-#include <ctype.h>
 
 #include "store/store.h"
 #include "utils/command.h"
@@ -55,4 +54,3 @@
 #include "steps/user/user.h"
 #include "steps/confirm/confirm.h"
 #include "steps/confirm/progress.h"
-

@@ -45,4 +45,4 @@ We believe in the values of freedom, transparency, and collaboration that the
 GPL-3.0 promotes, allowing users to freely use, modify, and distribute the
 software, ensuring that it remains a community-driven project.
 
-For more details, see `LICENSE.md`.
+For more details, see `LICENSE`.

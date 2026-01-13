@@ -1,3 +1,8 @@
+/**
+ * This code is responsible for creating, clearing, and destroying modal
+ * windows used throughout the installation wizard interface.
+ */
+
 #include "../all.h"
 
 WINDOW *create_modal(const char *title)
