@@ -100,9 +100,9 @@ void render_user_table(
                     : CUSTOM_COLOR_PAIR_PRIMARY_EVEN;
                 int marker_x = 3 + 1 + USER_COL_WIDTH_NUM + 1
                     + (int)strlen(user->username) + 1;
-                wattron(modal, COLOR_PAIR(marker_color));
+                wattron(modal, COLOR_PAIR(marker_color) | A_BOLD);
                 mvwprintw(modal, 7 + i, marker_x, "*");
-                wattroff(modal, COLOR_PAIR(marker_color));
+                wattroff(modal, COLOR_PAIR(marker_color) | A_BOLD);
             }
         }
         else
