@@ -14,7 +14,6 @@
 
 /* src/steps/confirm/confirm.c */
 int has_root_partition(Store *store);
-int has_duplicate_mount_points(Store *store);
 
 typedef enum {
     BOOT_OK = 0,
@@ -49,3 +48,4 @@ extern const char *mount_options[];
 int find_closest_size_index(unsigned long long size);
 int find_mount_index(const char *mount);
 int find_flag_index(int boot, int esp, int bios_grub);
+int has_duplicate_mount_point(Store *store, int mount_index, int edit_index);

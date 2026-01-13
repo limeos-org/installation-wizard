@@ -46,6 +46,7 @@ typedef struct
     int readonly;
     const char *description;
     int warning;
+    int error;
 } FormField;
 
 /** A type representing the result of form input handling. */

@@ -42,28 +42,6 @@ semistatic int has_root_partition(Store *store)
     return 0;
 }
 
-semistatic int has_duplicate_mount_points(Store *store)
-{
-    // Compare each partition's mount point against all subsequent partitions.
-    for (int i = 0; i < store->partition_count; i++)
-    {
-        if (store->partitions[i].mount_point[0] == '[') continue;
-        for (int j = i + 1; j < store->partition_count; j++)
-        {
-            if (store->partitions[j].mount_point[0] == '[') continue;
-            if (strcmp(
-                store->partitions[i].mount_point,
-                store->partitions[j].mount_point
-            ) == 0)
-            {
-                return 1;
-            }
-        }
-    }
-
-    return 0;
-}
-
 /** Finds a partition with the ESP flag set. */
 static Partition *find_esp_partition(Store *store)
 {
@@ -288,19 +266,6 @@ static void render_config_summary(WINDOW *modal, Store *store)
     }
 }
 
-static void render_duplicate_error(WINDOW *modal)
-{
-    // Display error message for duplicate mount points.
-    render_error(modal, 10, 3,
-        "Multiple partitions share the same mount point.\n"
-        "Go back and fix the configuration."
-    );
-
-    // Display footer with navigation options.
-    const char *footer[] = {"[Esc] Back", NULL};
-    render_footer(modal, footer);
-}
-
 static void render_no_root_error(WINDOW *modal)
 {
     // Display error message for missing root partition.
@@ -430,16 +395,11 @@ int run_confirmation_step(WINDOW *modal)
 
     // Perform validations.
     int has_root = has_root_partition(store);
-    int has_duplicate = has_duplicate_mount_points(store);
     BootValidationError boot_error = validate_boot_config(store, firmware, disk_label);
-    int can_install = has_root && !has_duplicate && (boot_error == BOOT_OK);
+    int can_install = has_root && (boot_error == BOOT_OK);
 
     // Render the appropriate message based on validation.
-    if (has_duplicate)
-    {
-        render_duplicate_error(modal);
-    }
-    else if (!has_root)
+    if (!has_root)
     {
         render_no_root_error(modal);
     }

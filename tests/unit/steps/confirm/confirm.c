@@ -80,91 +80,6 @@ static void test_has_root_partition_multiple(void **state)
     assert_int_equal(1, result);
 }
 
-/** Verifies has_duplicate_mount_points() returns 0 when no partitions. */
-static void test_has_duplicate_mount_points_empty(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 0;
-
-    int result = has_duplicate_mount_points(store);
-
-    assert_int_equal(0, result);
-}
-
-/** Verifies has_duplicate_mount_points() returns 0 with unique mounts. */
-static void test_has_duplicate_mount_points_unique(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 3;
-    strncpy(store->partitions[0].mount_point, "/", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[1].mount_point, "/home", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[2].mount_point, "/boot", STORE_MAX_MOUNT_LEN);
-
-    int result = has_duplicate_mount_points(store);
-
-    assert_int_equal(0, result);
-}
-
-/** Verifies has_duplicate_mount_points() returns 1 with duplicates. */
-static void test_has_duplicate_mount_points_duplicate(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 2;
-    strncpy(store->partitions[0].mount_point, "/home", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[1].mount_point, "/home", STORE_MAX_MOUNT_LEN);
-
-    int result = has_duplicate_mount_points(store);
-
-    assert_int_equal(1, result);
-}
-
-/** Verifies has_duplicate_mount_points() ignores [swap] partitions. */
-static void test_has_duplicate_mount_points_ignores_swap(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 2;
-    strncpy(store->partitions[0].mount_point, "[swap]", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[1].mount_point, "[swap]", STORE_MAX_MOUNT_LEN);
-
-    int result = has_duplicate_mount_points(store);
-
-    assert_int_equal(0, result);
-}
-
-/** Verifies has_duplicate_mount_points() ignores [none] partitions. */
-static void test_has_duplicate_mount_points_ignores_none(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 2;
-    strncpy(store->partitions[0].mount_point, "[none]", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[1].mount_point, "[none]", STORE_MAX_MOUNT_LEN);
-
-    int result = has_duplicate_mount_points(store);
-
-    assert_int_equal(0, result);
-}
-
-/** Verifies has_duplicate_mount_points() detects duplicate among mixed. */
-static void test_has_duplicate_mount_points_mixed(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 4;
-    strncpy(store->partitions[0].mount_point, "/", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[1].mount_point, "[swap]", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[2].mount_point, "/home", STORE_MAX_MOUNT_LEN);
-    strncpy(store->partitions[3].mount_point, "/home", STORE_MAX_MOUNT_LEN);
-
-    int result = has_duplicate_mount_points(store);
-
-    assert_int_equal(1, result);
-}
-
 /** Verifies validate_uefi_boot() returns error when no ESP exists. */
 static void test_validate_uefi_boot_no_esp(void **state)
 {
@@ -533,14 +448,6 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_has_root_partition_exists, setup, teardown),
         cmocka_unit_test_setup_teardown(test_has_root_partition_no_root, setup, teardown),
         cmocka_unit_test_setup_teardown(test_has_root_partition_multiple, setup, teardown),
-
-        // has_duplicate_mount_points tests
-        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_points_empty, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_points_unique, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_points_duplicate, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_points_ignores_swap, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_points_ignores_none, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_points_mixed, setup, teardown),
 
         // validate_uefi_boot tests
         cmocka_unit_test_setup_teardown(test_validate_uefi_boot_no_esp, setup, teardown),

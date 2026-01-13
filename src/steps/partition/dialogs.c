@@ -113,11 +113,40 @@ semistatic int find_flag_index(int boot, int esp, int bios_grub)
     return 0;
 }
 
+semistatic int has_duplicate_mount_point(Store *store, int mount_index, int edit_index)
+{
+    // Skip check for swap and none (duplicates allowed).
+    if (mount_index == 4 || mount_index == 5)
+    {
+        return 0;
+    }
+
+    // Get the mount point string for the selected option.
+    const char *mount = mount_options[mount_index];
+
+    // Check all partitions for duplicates.
+    for (int i = 0; i < store->partition_count; i++)
+    {
+        // Skip the partition being edited.
+        if (i == edit_index)
+        {
+            continue;
+        }
+
+        if (strcmp(store->partitions[i].mount_point, mount) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static int run_partition_form(
     WINDOW *modal, const char *title, const char *free_string,
     unsigned long long free_space,
     int *size_index, int *mount_index, int *type_index, int *flag_index,
-    const char *footer_action
+    const char *footer_action, Store *store, int edit_index
 )
 {
     int focused = FIELD_SIZE;
@@ -129,6 +158,9 @@ static int run_partition_form(
         unsigned long long selected_size = size_presets[*size_index];
         int exceeds = (selected_size > free_space);
 
+        // Check for duplicate mount point.
+        int duplicate = has_duplicate_mount_point(store, *mount_index, edit_index);
+
         // Set up form fields.
         const char *size_desc = exceeds
             ? "Selected size exceeds available space.\n"
@@ -136,18 +168,23 @@ static int run_partition_form(
             : "The size you want this partition to be.\n"
               "Sizes exceeding free space will be clamped.";
 
+        const char *mount_desc = duplicate
+            ? "Another partition already uses this mount point.\n"
+              "Choose a different mount point."
+            : "Where this partition will be accessible.\n"
+              "Filesystem (ext4, swap) is automatically chosen.";
+
         FormField fields[FIELD_COUNT] = {
             { "Size",       size_labels,   SIZE_COUNT,  *size_index,  0,
-              size_desc, exceeds },
+              size_desc, exceeds, 0 },
             { "Mount",      mount_options, MOUNT_COUNT, *mount_index, 0,
-              "Where this partition will be accessible.\n"
-              "Filesystem (ext4, swap) is automatically chosen.", 0 },
+              mount_desc, 0, duplicate },
             { "Type",       type_options,  TYPE_COUNT,  *type_index,  0,
               "Partition type. Primary is standard for most uses.\n"
-              "Use logical partitions inside extended partitions.", 0 },
+              "Use logical partitions inside extended partitions.", 0, 0 },
             { "Flags",      flag_options,  FLAG_COUNT,  *flag_index,  0,
               "Special flags for bootloader configuration.\n"
-              "'esp' for UEFI, 'bios_grub' for BIOS+GPT.", 0 }
+              "'esp' for UEFI, 'bios_grub' for BIOS+GPT.", 0, 0 }
         };
 
         // Clear modal and render dialog title.
@@ -183,6 +220,11 @@ static int run_partition_form(
 
         if (result == FORM_SUBMIT)
         {
+            // Block submission if there's a duplicate mount point.
+            if (duplicate)
+            {
+                continue;
+            }
             return 1;
         }
         else if (result == FORM_CANCEL)
@@ -293,7 +335,7 @@ int add_partition_dialog(
     // Run the partition form.
     if (!run_partition_form(
         modal, "Add Partition", free_string, free_space, &size_index,
-        &mount_index, &type_index, &flag_index, "Add"
+        &mount_index, &type_index, &flag_index, "Add", store, -1
     ))
     {
         return 0;
@@ -399,7 +441,8 @@ int edit_partition_dialog(
     // Run the partition form.
     if (!run_partition_form(
         modal, title, free_string, free_space,
-        &size_index, &mount_index, &type_index, &flag_index, "Save"
+        &size_index, &mount_index, &type_index, &flag_index, "Save",
+        store, selected
     ))
     {
         return 0;

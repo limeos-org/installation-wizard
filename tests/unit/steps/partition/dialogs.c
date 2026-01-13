@@ -9,6 +9,7 @@
 static int setup(void **state)
 {
     (void)state;
+    reset_store();
     return 0;
 }
 
@@ -307,6 +308,104 @@ static void test_find_flag_index_boot_over_all(void **state)
     assert_int_equal(1, result);
 }
 
+/** Verifies has_duplicate_mount_point() returns 0 when no partitions. */
+static void test_has_duplicate_mount_point_empty(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 0;
+
+    int result = has_duplicate_mount_point(store, 0, -1);
+
+    assert_int_equal(0, result);
+}
+
+/** Verifies has_duplicate_mount_point() returns 0 with unique mounts. */
+static void test_has_duplicate_mount_point_unique(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 2;
+    strncpy(store->partitions[0].mount_point, "/", STORE_MAX_MOUNT_LEN);
+    strncpy(store->partitions[1].mount_point, "/home", STORE_MAX_MOUNT_LEN);
+
+    // Trying to add /boot (index 1).
+    int result = has_duplicate_mount_point(store, 1, -1);
+
+    assert_int_equal(0, result);
+}
+
+/** Verifies has_duplicate_mount_point() returns 1 with duplicate. */
+static void test_has_duplicate_mount_point_duplicate(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 1;
+    strncpy(store->partitions[0].mount_point, "/", STORE_MAX_MOUNT_LEN);
+
+    // Trying to add / (index 0) which already exists.
+    int result = has_duplicate_mount_point(store, 0, -1);
+
+    assert_int_equal(1, result);
+}
+
+/** Verifies has_duplicate_mount_point() allows swap duplicates. */
+static void test_has_duplicate_mount_point_allows_swap(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 1;
+    strncpy(store->partitions[0].mount_point, "[swap]", STORE_MAX_MOUNT_LEN);
+
+    // Trying to add swap (index 4) - should be allowed.
+    int result = has_duplicate_mount_point(store, 4, -1);
+
+    assert_int_equal(0, result);
+}
+
+/** Verifies has_duplicate_mount_point() allows none duplicates. */
+static void test_has_duplicate_mount_point_allows_none(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 1;
+    strncpy(store->partitions[0].mount_point, "[none]", STORE_MAX_MOUNT_LEN);
+
+    // Trying to add none (index 5) - should be allowed.
+    int result = has_duplicate_mount_point(store, 5, -1);
+
+    assert_int_equal(0, result);
+}
+
+/** Verifies has_duplicate_mount_point() excludes partition being edited. */
+static void test_has_duplicate_mount_point_excludes_self(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 1;
+    strncpy(store->partitions[0].mount_point, "/", STORE_MAX_MOUNT_LEN);
+
+    // Editing partition 0 with / (index 0) - should not count as duplicate.
+    int result = has_duplicate_mount_point(store, 0, 0);
+
+    assert_int_equal(0, result);
+}
+
+/** Verifies has_duplicate_mount_point() detects duplicate when editing. */
+static void test_has_duplicate_mount_point_duplicate_when_editing(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+    store->partition_count = 2;
+    strncpy(store->partitions[0].mount_point, "/", STORE_MAX_MOUNT_LEN);
+    strncpy(store->partitions[1].mount_point, "/home", STORE_MAX_MOUNT_LEN);
+
+    // Editing partition 1 to / (index 0) - should detect duplicate.
+    int result = has_duplicate_mount_point(store, 0, 1);
+
+    assert_int_equal(1, result);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -342,6 +441,15 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_find_flag_index_boot_priority, setup, teardown),
         cmocka_unit_test_setup_teardown(test_find_flag_index_esp_priority, setup, teardown),
         cmocka_unit_test_setup_teardown(test_find_flag_index_boot_over_all, setup, teardown),
+
+        // has_duplicate_mount_point tests
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_empty, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_unique, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_duplicate, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_allows_swap, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_allows_none, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_excludes_self, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_duplicate_when_editing, setup, teardown),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

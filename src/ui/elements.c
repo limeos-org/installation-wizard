@@ -364,7 +364,11 @@ void render_form(
         // Render description below focused field (with gap above).
         if (is_focused && field->description != NULL)
         {
-            if (field->warning)
+            if (field->error)
+            {
+                render_error(window, row_y + 2, x, field->description);
+            }
+            else if (field->warning)
             {
                 render_warning(window, row_y + 2, x, field->description);
             }
