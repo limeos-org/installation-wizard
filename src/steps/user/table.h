@@ -18,6 +18,9 @@
 /** The column width for admin status. */
 #define USER_COL_WIDTH_ADMIN  6
 
+/** The column width for primary user indicator. */
+#define USER_COL_WIDTH_PRIMARY 8
+
 /**
  * Renders the user table in the modal window.
  *

@@ -58,12 +58,6 @@
 /** Color pair for error note accent. */
 #define CUSTOM_COLOR_PAIR_ERROR_NOTE   11
 
-/** Color pair for primary user marker on odd row. */
-#define CUSTOM_COLOR_PAIR_PRIMARY_ODD  12
-
-/** Color pair for primary user marker on even row. */
-#define CUSTOM_COLOR_PAIR_PRIMARY_EVEN 13
-
 /**
  * Returns non-zero if terminal supports extended colors (16+).
  */

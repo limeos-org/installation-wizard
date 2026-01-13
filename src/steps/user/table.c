@@ -22,13 +22,14 @@ void render_user_table(
 
     // Render column headers with darker background.
     wattron(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_HEADER));
-    char header[64];
+    char header[80];
     snprintf(
         header, sizeof(header),
-        " #  %-*s %-*s %-*s",
+        " #  %-*s %-*s %-*s %-*s",
         USER_COL_WIDTH_NAME, "Username",
         USER_COL_WIDTH_PASS, "Password",
-        USER_COL_WIDTH_ADMIN, "Admin"
+        USER_COL_WIDTH_ADMIN, "Admin",
+        USER_COL_WIDTH_PRIMARY, "Primary"
     );
     mvwprintw(modal, 6, 3, "%-*s", table_width, header);
     wattroff(modal, COLOR_PAIR(CUSTOM_COLOR_PAIR_HEADER));
@@ -68,6 +69,9 @@ void render_user_table(
             // Build admin status string.
             const char *admin_string = user->is_admin ? "Yes" : "No";
 
+            // Build primary status string.
+            const char *primary_string = (user_index == 0) ? "Yes" : "No";
+
             // Highlight selected user in selection mode.
             if (in_user_select_mode && user_index == selected_user)
             {
@@ -75,40 +79,17 @@ void render_user_table(
             }
 
             // Render the user row.
-            char row[64];
+            char row[80];
             snprintf(
                 row, sizeof(row),
-                " %-*d %-*s %-*s %-*s",
+                " %-*d %-*s %-*s %-*s %-*s",
                 USER_COL_WIDTH_NUM, user_index + 1,
                 USER_COL_WIDTH_NAME, username_display,
                 USER_COL_WIDTH_PASS, masked_password,
-                USER_COL_WIDTH_ADMIN, admin_string
+                USER_COL_WIDTH_ADMIN, admin_string,
+                USER_COL_WIDTH_PRIMARY, primary_string
             );
             mvwprintw(modal, 7 + i, 3, "%-*s", table_width, row);
-
-            // Render bold asterisk for primary user.
-            if (user_index == 0)
-            {
-                int marker_x = 3 + 1 + USER_COL_WIDTH_NUM + 1
-                    + (int)strlen(user->username) + 1;
-                if (in_user_select_mode && user_index == selected_user)
-                {
-                    // Selected: bold white on dark bg (A_REVERSE still active).
-                    wattron(modal, A_BOLD);
-                    mvwprintw(modal, 7 + i, marker_x, "*");
-                    wattroff(modal, A_BOLD);
-                }
-                else
-                {
-                    // Not selected: bold blue on row bg.
-                    int marker_color = (user_index % 2 == 0)
-                        ? CUSTOM_COLOR_PAIR_PRIMARY_ODD
-                        : CUSTOM_COLOR_PAIR_PRIMARY_EVEN;
-                    wattron(modal, COLOR_PAIR(marker_color) | A_BOLD);
-                    mvwprintw(modal, 7 + i, marker_x, "*");
-                    wattroff(modal, COLOR_PAIR(marker_color) | A_BOLD);
-                }
-            }
 
             // Remove highlight after rendering.
             if (in_user_select_mode && user_index == selected_user)
