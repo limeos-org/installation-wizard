@@ -51,6 +51,12 @@ typedef enum {
     FIRMWARE_BIOS
 } FirmwareType;
 
+/** Partition method types. */
+typedef enum {
+    METHOD_EASY,
+    METHOD_MANUAL
+} PartitionMethod;
+
 /** Represents a single partition configuration. */
 typedef struct Partition {
     unsigned long long size_bytes;
@@ -77,6 +83,7 @@ typedef struct {
     int force_uefi;       // 0 = auto-detect, 1 = force UEFI, 2 = force BIOS
     int force_disk_label; // 0 = auto (GPT), 1 = force GPT, 2 = force MBR
     DiskLabel disk_label; // Determined disk label (GPT or MBR)
+    PartitionMethod partition_method; // Easy or Manual partitioning
     char locale[STORE_MAX_LOCALE_LEN];
     char hostname[STORE_MAX_HOSTNAME_LEN];
     User users[STORE_MAX_USERS];
