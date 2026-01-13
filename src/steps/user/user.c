@@ -25,8 +25,8 @@ int run_user_step(WINDOW *modal)
 
     // Define available actions for the user step.
     StepOption actions[] = {
-        {"edit", "Edit"},
         {"add", "Add"},
+        {"edit", "Edit"},
         {"remove", "Remove"},
         {"done", "Done"}
     };
