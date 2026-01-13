@@ -13,6 +13,9 @@
 /** Maximum display width for text input fields. */
 #define TEXT_INPUT_WIDTH 24
 
+/** Display width for spinner fields (Yes/No). */
+#define SPINNER_WIDTH 3
+
 /** A type representing a text input field for forms. */
 typedef struct
 {
@@ -62,7 +65,7 @@ static void render_text_form(
                 wattron(window, A_REVERSE);
             }
             const char *value = field->spinner_options[field->spinner_current];
-            mvwprintw(window, row_y, value_x, "< %-*s >", TEXT_INPUT_WIDTH - 4, value);
+            mvwprintw(window, row_y, value_x, "< %-*s >", SPINNER_WIDTH, value);
             if (is_focused)
             {
                 wattroff(window, A_REVERSE);
