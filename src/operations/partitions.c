@@ -38,30 +38,14 @@ static int create_partition_entries(const char *disk, Store *store)
         unsigned long long size_mb = partition->size_bytes / (1024 * 1024);
         unsigned long long end_mb = start_mb + size_mb;
 
-        // For the last partition, use 100% to fill remaining space.
-        int is_last = (i == store->partition_count - 1);
-
         // Create partition with calculated boundaries.
-        if (is_last)
-        {
-            snprintf(
-                command, sizeof(command),
-                "parted -s %s mkpart %s %lluMiB 100%% >>" INSTALL_LOG_PATH " 2>&1",
-                escaped_disk,
-                (partition->type == PART_PRIMARY) ? "primary" : "logical",
-                start_mb
-            );
-        }
-        else
-        {
-            snprintf(
-                command, sizeof(command),
-                "parted -s %s mkpart %s %lluMiB %lluMiB >>" INSTALL_LOG_PATH " 2>&1",
-                escaped_disk,
-                (partition->type == PART_PRIMARY) ? "primary" : "logical",
-                start_mb, end_mb
-            );
-        }
+        snprintf(
+            command, sizeof(command),
+            "parted -s %s mkpart %s %lluMiB %lluMiB >>" INSTALL_LOG_PATH " 2>&1",
+            escaped_disk,
+            (partition->type == PART_PRIMARY) ? "primary" : "logical",
+            start_mb, end_mb
+        );
         if (run_command(command) != 0)
         {
             return -2;

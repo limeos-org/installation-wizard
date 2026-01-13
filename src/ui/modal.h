@@ -2,7 +2,7 @@
 #include "../all.h"
 
 /** Default modal window width. */
-#define MODAL_WIDTH 70
+#define MODAL_WIDTH 60
 
 /** Default modal window height. */
 #define MODAL_HEIGHT 15

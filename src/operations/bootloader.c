@@ -56,20 +56,6 @@ static int find_esp_partition_index(Store *store)
     return -1;
 }
 
-static int is_esp_already_mounted(Store *store)
-{
-    // Check if ESP has a mount point (meaning it was mounted during partition setup).
-    for (int i = 0; i < store->partition_count; i++)
-    {
-        if (store->partitions[i].flag_esp &&
-            store->partitions[i].mount_point[0] == '/')
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 static int mount_efi_partition(const char *disk, int esp_partition_index)
 {
     // Construct the ESP partition device path.
@@ -217,11 +203,11 @@ int setup_bootloader(void)
     // Detect boot mode.
     int is_uefi = detect_uefi_mode(store);
 
-    // Mount EFI partition if running in UEFI mode and not already mounted.
+    // Mount EFI partition if running in UEFI mode.
     if (is_uefi)
     {
         int esp_index = find_esp_partition_index(store);
-        if (esp_index > 0 && !is_esp_already_mounted(store))
+        if (esp_index > 0)
         {
             result = mount_efi_partition(disk, esp_index);
             if (result != 0)

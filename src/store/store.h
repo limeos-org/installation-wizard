@@ -13,6 +13,18 @@
 /** Maximum length for mount point path. */
 #define STORE_MAX_MOUNT_LEN 64
 
+/** Maximum length for username. */
+#define STORE_MAX_USERNAME_LEN 32
+
+/** Maximum length for hostname. */
+#define STORE_MAX_HOSTNAME_LEN 64
+
+/** Maximum length for password. */
+#define STORE_MAX_PASSWORD_LEN 128
+
+/** Maximum number of users. */
+#define STORE_MAX_USERS 8
+
 /** Filesystem types for partitions. */
 typedef enum {
     FS_EXT4,
@@ -27,6 +39,18 @@ typedef enum {
     PART_LOGICAL
 } PartitionType;
 
+/** Disk label types (partition table). */
+typedef enum {
+    DISK_LABEL_GPT,
+    DISK_LABEL_MBR
+} DiskLabel;
+
+/** Firmware types. */
+typedef enum {
+    FIRMWARE_UEFI,
+    FIRMWARE_BIOS
+} FirmwareType;
+
 /** Represents a single partition configuration. */
 typedef struct Partition {
     unsigned long long size_bytes;
@@ -38,22 +62,28 @@ typedef struct Partition {
     int flag_bios_grub;
 } Partition;
 
-/** Partition method types. */
-typedef enum {
-    METHOD_MANUAL,  // Manual partitioning (current behavior)
-    METHOD_EASY     // Automatic partitioning
-} PartitionMethod;
+/** A type representing a user account configuration. */
+typedef struct User
+{
+    char username[STORE_MAX_USERNAME_LEN];
+    char password[STORE_MAX_PASSWORD_LEN];
+    int is_admin;
+} User;
 
 /** Global store containing user selections and installation settings. */
 typedef struct {
     int current_step;
     int dry_run;
-    int force_uefi; // 0 = auto-detect, 1 = force UEFI, -1 = force BIOS
+    int force_uefi;       // 0 = auto-detect, 1 = force UEFI, 2 = force BIOS
+    int force_disk_label; // 0 = auto (GPT), 1 = force GPT, 2 = force MBR
+    DiskLabel disk_label; // Determined disk label (GPT or MBR)
     char locale[STORE_MAX_LOCALE_LEN];
+    char hostname[STORE_MAX_HOSTNAME_LEN];
+    User users[STORE_MAX_USERS];
+    int user_count;
     char disk[STORE_MAX_DISK_LEN];
     Partition partitions[STORE_MAX_PARTITIONS];
     int partition_count;
-    PartitionMethod partition_method; // Easy or Manual partitioning
 } Store;
 
 /**
