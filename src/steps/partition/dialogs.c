@@ -6,7 +6,7 @@
 #include "../../all.h"
 
 #define SIZE_COUNT 19
-#define MOUNT_COUNT 6
+#define MOUNT_COUNT 7
 #define FLAG_COUNT 4
 #define TYPE_COUNT 2
 #define FIELD_SIZE   0
@@ -46,7 +46,7 @@ semistatic const char *size_labels[] =
     "1GB", "2GB", "4GB", "8GB", "16GB", "32GB", "64GB", "128GB", "512GB", "1TB"
 };
 
-semistatic const char *mount_options[] = { "/", "/boot", "/home", "/var", "swap", "none" };
+semistatic const char *mount_options[] = { "/", "/boot", "/boot/efi", "/home", "/var", "swap", "none" };
 static const char *flag_options[] = { "none", "boot", "esp", "bios_grub" };
 static const char *type_options[] = { "primary", "logical" };
 
@@ -82,13 +82,13 @@ semistatic int find_mount_index(const char *mount)
     // Handle swap partition mount point.
     if (strcmp(mount, "[swap]") == 0)
     {
-        return 4;
+        return 5;
     }
 
     // Handle unmounted partition.
     if (strcmp(mount, "[none]") == 0)
     {
-        return 5;
+        return 6;
     }
 
     // Search for matching mount point in options.

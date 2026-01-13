@@ -151,44 +151,54 @@ static void test_find_mount_index_boot(void **state)
     assert_int_equal(1, result);
 }
 
-/** Verifies find_mount_index() returns 2 for /home mount point. */
+/** Verifies find_mount_index() returns 2 for /boot/efi mount point. */
+static void test_find_mount_index_boot_efi(void **state)
+{
+    (void)state;
+
+    int result = find_mount_index("/boot/efi");
+
+    assert_int_equal(2, result);
+}
+
+/** Verifies find_mount_index() returns 3 for /home mount point. */
 static void test_find_mount_index_home(void **state)
 {
     (void)state;
 
     int result = find_mount_index("/home");
 
-    assert_int_equal(2, result);
+    assert_int_equal(3, result);
 }
 
-/** Verifies find_mount_index() returns 3 for /var mount point. */
+/** Verifies find_mount_index() returns 4 for /var mount point. */
 static void test_find_mount_index_var(void **state)
 {
     (void)state;
 
     int result = find_mount_index("/var");
 
-    assert_int_equal(3, result);
+    assert_int_equal(4, result);
 }
 
-/** Verifies find_mount_index() returns 4 for [swap] mount point. */
+/** Verifies find_mount_index() returns 5 for [swap] mount point. */
 static void test_find_mount_index_swap_bracket(void **state)
 {
     (void)state;
 
     int result = find_mount_index("[swap]");
 
-    assert_int_equal(4, result);
+    assert_int_equal(5, result);
 }
 
-/** Verifies find_mount_index() returns 5 for [none] mount point. */
+/** Verifies find_mount_index() returns 6 for [none] mount point. */
 static void test_find_mount_index_none_bracket(void **state)
 {
     (void)state;
 
     int result = find_mount_index("[none]");
 
-    assert_int_equal(5, result);
+    assert_int_equal(6, result);
 }
 
 /** Verifies find_mount_index() returns 0 for unknown mount point. */
@@ -209,8 +219,8 @@ static void test_find_mount_index_swap_option(void **state)
 
     int result = find_mount_index("swap");
 
-    // This matches mount_options[4] = "swap".
-    assert_int_equal(4, result);
+    // This matches mount_options[5] = "swap".
+    assert_int_equal(5, result);
 }
 
 /** Verifies find_mount_index() handles "none" without brackets. */
@@ -220,8 +230,8 @@ static void test_find_mount_index_none_option(void **state)
 
     int result = find_mount_index("none");
 
-    // This matches mount_options[5] = "none".
-    assert_int_equal(5, result);
+    // This matches mount_options[6] = "none".
+    assert_int_equal(6, result);
 }
 
 /** Verifies find_mount_index() handles empty string. */
@@ -424,6 +434,7 @@ int main(void)
         // find_mount_index tests
         cmocka_unit_test_setup_teardown(test_find_mount_index_root, setup, teardown),
         cmocka_unit_test_setup_teardown(test_find_mount_index_boot, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_find_mount_index_boot_efi, setup, teardown),
         cmocka_unit_test_setup_teardown(test_find_mount_index_home, setup, teardown),
         cmocka_unit_test_setup_teardown(test_find_mount_index_var, setup, teardown),
         cmocka_unit_test_setup_teardown(test_find_mount_index_swap_bracket, setup, teardown),
