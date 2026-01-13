@@ -548,11 +548,11 @@ int add_user_dialog(WINDOW *modal, Store *store)
 
 int remove_user_dialog(WINDOW *modal, Store *store)
 {
-    // Prevent removal of the default user.
+    // Prevent removal of the primary user.
     if (store->user_count <= 1)
     {
         show_notice(modal, NOTICE_ERROR, "Remove User",
-            "Cannot remove the default user.\n"
+            "Cannot remove the primary user.\n"
             "At least one user must exist.");
         return 0;
     }
