@@ -45,6 +45,12 @@ int generate_fstab(void)
     Store *store = get_store();
     const char *disk = store->disk;
 
+    // In dry-run mode, skip actual file operations.
+    if (store->dry_run)
+    {
+        return 0;
+    }
+
     // Open fstab file for writing.
     FILE *fstab = fopen("/mnt/etc/fstab", "w");
     if (!fstab)

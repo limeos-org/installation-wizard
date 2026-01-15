@@ -44,17 +44,19 @@ int run_install(install_progress_cb progress_cb, void *context)
     }
     NOTIFY(INSTALL_STEP_OK, STEP_ROOTFS, 0);
 
-    // Step 2b: Generate fstab for target system.
+    // Step 3: Generate fstab for target system.
     write_install_log_header("Generating fstab");
+    NOTIFY(INSTALL_STEP_BEGIN, STEP_FSTAB, 0);
     result = generate_fstab();
     if (result != 0)
     {
-        NOTIFY(INSTALL_STEP_FAIL, STEP_ROOTFS, result);
+        NOTIFY(INSTALL_STEP_FAIL, STEP_FSTAB, result);
         cleanup_mounts();
-        return -2;
+        return -3;
     }
+    NOTIFY(INSTALL_STEP_OK, STEP_FSTAB, 0);
 
-    // Step 3: Install and configure bootloader.
+    // Step 4: Install and configure bootloader.
     write_install_log_header("Installing bootloader");
     NOTIFY(INSTALL_STEP_BEGIN, STEP_BOOTLOADER, 0);
     result = setup_bootloader();
@@ -62,11 +64,11 @@ int run_install(install_progress_cb progress_cb, void *context)
     {
         NOTIFY(INSTALL_STEP_FAIL, STEP_BOOTLOADER, result);
         cleanup_mounts();
-        return -3;
+        return -4;
     }
     NOTIFY(INSTALL_STEP_OK, STEP_BOOTLOADER, 0);
 
-    // Step 4: Configure system locale.
+    // Step 5: Configure system locale.
     write_install_log_header("Configuring locale");
     NOTIFY(INSTALL_STEP_BEGIN, STEP_LOCALE, 0);
     result = configure_locale();
@@ -74,11 +76,11 @@ int run_install(install_progress_cb progress_cb, void *context)
     {
         NOTIFY(INSTALL_STEP_FAIL, STEP_LOCALE, result);
         cleanup_mounts();
-        return -4;
+        return -5;
     }
     NOTIFY(INSTALL_STEP_OK, STEP_LOCALE, 0);
 
-    // Step 5: Configure user accounts and hostname.
+    // Step 6: Configure user accounts and hostname.
     write_install_log_header("Configuring users");
     NOTIFY(INSTALL_STEP_BEGIN, STEP_USERS, 0);
     result = configure_users();
@@ -86,7 +88,7 @@ int run_install(install_progress_cb progress_cb, void *context)
     {
         NOTIFY(INSTALL_STEP_FAIL, STEP_USERS, result);
         cleanup_mounts();
-        return -5;
+        return -6;
     }
     NOTIFY(INSTALL_STEP_OK, STEP_USERS, 0);
 

@@ -18,6 +18,7 @@ typedef enum {
 typedef enum {
     STEP_PARTITIONS,
     STEP_ROOTFS,
+    STEP_FSTAB,
     STEP_BOOTLOADER,
     STEP_LOCALE,
     STEP_USERS
@@ -48,8 +49,9 @@ typedef void (*install_progress_cb)(
  * @return - `0` - on success.
  * @return - `-1` - if partitioning fails.
  * @return - `-2` - if rootfs extraction fails.
- * @return - `-3` - if bootloader setup fails.
- * @return - `-4` - if locale configuration fails.
- * @return - `-5` - if user configuration fails.
+ * @return - `-3` - if fstab generation fails.
+ * @return - `-4` - if bootloader setup fails.
+ * @return - `-5` - if locale configuration fails.
+ * @return - `-6` - if user configuration fails.
  */
 int run_install(install_progress_cb progress_cb, void *context);

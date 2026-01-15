@@ -15,6 +15,7 @@ static const char *get_install_step_name(InstallStep step)
     {
         case STEP_PARTITIONS: return "Partitioning";
         case STEP_ROOTFS:     return "Extracting system files";
+        case STEP_FSTAB:      return "Generating fstab";
         case STEP_BOOTLOADER: return "Installing bootloader";
         case STEP_LOCALE:     return "Configuring locale";
         case STEP_USERS:      return "Configuring users";
@@ -111,9 +112,10 @@ static int get_step_row(InstallStep step)
     {
         case STEP_PARTITIONS: return 4;
         case STEP_ROOTFS:     return 5;
-        case STEP_BOOTLOADER: return 6;
-        case STEP_LOCALE:     return 7;
-        case STEP_USERS:      return 8;
+        case STEP_FSTAB:      return 6;
+        case STEP_BOOTLOADER: return 7;
+        case STEP_LOCALE:     return 8;
+        case STEP_USERS:      return 9;
         default:              return 4;
     }
 }
