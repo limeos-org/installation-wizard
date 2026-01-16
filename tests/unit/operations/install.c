@@ -147,8 +147,8 @@ static void test_run_install_sends_step_begin_events(void **state)
     run_install(test_progress_cb, NULL);
     close_dry_run_log();
 
-    // Should have at least: START, 6x(BEGIN+OK), COMPLETE, AWAIT_REBOOT.
-    assert_true(callback_count >= 15);
+    // Should have at least: START, 6x(BEGIN+OK), AWAIT_REBOOT.
+    assert_true(callback_count >= 14);
 
     // At minimum, verify multiple STEP_BEGIN events occurred.
     int begin_count = 0;
@@ -160,27 +160,6 @@ static void test_run_install_sends_step_begin_events(void **state)
         }
     }
     assert_int_equal(6, begin_count);
-}
-
-/** Verifies run_install() sends INSTALL_COMPLETE on success. */
-static void test_run_install_sends_complete_event(void **state)
-{
-    (void)state;
-    setup_minimal_config();
-
-    run_install(test_progress_cb, NULL);
-    close_dry_run_log();
-
-    int found_complete = 0;
-    for (int i = 0; i < callback_count; i++)
-    {
-        if (callback_invocations[i] == INSTALL_COMPLETE)
-        {
-            found_complete = 1;
-            break;
-        }
-    }
-    assert_true(found_complete);
 }
 
 /** Verifies run_install() sends INSTALL_AWAIT_REBOOT after completion. */
@@ -291,7 +270,6 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_run_install_returns_zero_on_success, setup, teardown),
         cmocka_unit_test_setup_teardown(test_run_install_sends_start_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_run_install_sends_step_begin_events, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_install_sends_complete_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_run_install_sends_await_reboot_event, setup, teardown),
         cmocka_unit_test_setup_teardown(test_run_install_executes_reboot, setup, teardown),
         cmocka_unit_test_setup_teardown(test_run_install_works_without_callback, setup, teardown),

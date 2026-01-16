@@ -8,7 +8,6 @@ typedef enum {
     INSTALL_STEP_BEGIN,
     INSTALL_STEP_OK,
     INSTALL_STEP_FAIL,
-    INSTALL_COMPLETE,
     INSTALL_AWAIT_REBOOT
 } InstallEvent;
 

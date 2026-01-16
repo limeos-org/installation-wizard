@@ -8,7 +8,7 @@
 
 /** Minimum sizes for boot-related partitions (matching confirm.c). */
 #define ESP_MIN_SIZE_BYTES      (100ULL * 1000000)
-#define BIOS_GRUB_MIN_SIZE_BYTES (1ULL * 1000000)
+#define BIOS_GRUB_MIN_SIZE_BYTES (2ULL * 1000000)
 #define BOOT_PART_MIN_SIZE_BYTES (300ULL * 1000000)
 
 /** Sets up the test environment before each test. */

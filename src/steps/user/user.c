@@ -8,6 +8,15 @@
 
 #define USER_STEP_NUM 2
 
+// Generates a hostname from the given username and chassis type.
+static void generate_hostname(
+    const char *username, char *out_hostname, size_t out_hostname_size
+)
+{
+    // Generate hostname as username-suffix.
+    snprintf(out_hostname, out_hostname_size, "%s-%s", username, get_default_hostname_suffix());
+}
+
 int run_user_step(WINDOW *modal)
 {
     // Get the global store.

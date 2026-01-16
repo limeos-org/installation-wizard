@@ -299,6 +299,36 @@ static int select_partition(
     }
 }
 
+semistatic unsigned long long calculate_ideal_swap_size(unsigned long long ram_bytes)
+{
+    unsigned long long swap_size;
+
+    // Define size thresholds in bytes.
+    const unsigned long long GB_8 = 8ULL * 1000000000;
+    const unsigned long long GB_16 = 16ULL * 1000000000;
+
+    // Determine swap size based on RAM amount.
+    if (ram_bytes < GB_8)
+    {
+        // For systems with less than 8GB RAM, swap equals RAM.
+        swap_size = ram_bytes;
+    }
+    else if (ram_bytes <= GB_16)
+    {
+        // For 8-16GB RAM, use 4GB swap.
+        swap_size = 4ULL * 1000000000;
+    }
+    else
+    {
+        // For more than 16GB RAM, use 4GB swap.
+        swap_size = 4ULL * 1000000000;
+    }
+
+    // Round to nearest available size preset.
+    int index = find_closest_size_index(swap_size);
+    return size_presets[index];
+}
+
 int add_partition_dialog(
     WINDOW *modal, Store *store, unsigned long long disk_size
 )
@@ -538,6 +568,114 @@ int remove_partition_dialog(
         store->partitions[i] = store->partitions[i + 1];
     }
     store->partition_count--;
+
+    return 1;
+}
+
+int autofill_partitions(Store *store, unsigned long long disk_size)
+{
+    unsigned long long used_space = 0;
+
+    // Detect system configuration.
+    FirmwareType firmware = detect_firmware_type();
+    DiskLabel disk_label = get_disk_label();
+    unsigned long long ram_bytes = get_system_ram();
+
+    // Use default 4GB if RAM detection fails.
+    if (ram_bytes == 0)
+    {
+        ram_bytes = 4ULL * 1000000000;
+    }
+
+    // Clear existing partitions.
+    store->partition_count = 0;
+
+    // Create boot partition based on system type.
+    // Note that BIOS + MBR doesn't need a special boot partition.
+    if (firmware == FIRMWARE_UEFI)
+    {
+        // UEFI systems need ESP: 512MB, /boot/efi, FAT32, esp flag.
+        Partition esp = {0};
+        esp.size_bytes = 512ULL * 1000000;
+        strncpy(esp.mount_point, "/boot/efi", sizeof(esp.mount_point));
+        esp.filesystem = FS_FAT32;
+        esp.type = PART_PRIMARY;
+        esp.flag_esp = 1;
+
+        // Add ESP partition to store.
+        store->partitions[store->partition_count++] = esp;
+        used_space += esp.size_bytes;
+    }
+    else if (disk_label == DISK_LABEL_GPT)
+    {
+        // BIOS + GPT needs bios_grub: 2MB, no mount, no FS, bios_grub flag.
+        Partition bios_grub = {0};
+        bios_grub.size_bytes = 2ULL * 1000000;
+        strncpy(bios_grub.mount_point, "[none]", sizeof(bios_grub.mount_point));
+        bios_grub.filesystem = FS_NONE;
+        bios_grub.type = PART_PRIMARY;
+        bios_grub.flag_bios_grub = 1;
+
+        // Add bios_grub partition to store.
+        store->partitions[store->partition_count++] = bios_grub;
+        used_space += bios_grub.size_bytes;
+    }
+
+    // Calculate ideal swap size based on RAM.
+    unsigned long long swap_size = calculate_ideal_swap_size(ram_bytes);
+
+    // Ensure swap doesn't exceed remaining space (leave at least 1GB for root).
+    unsigned long long remaining_for_swap = disk_size - used_space - (1ULL * 1000000000);
+    if (swap_size > remaining_for_swap)
+    {
+        // Find largest preset that fits.
+        swap_size = 0;
+        for (int i = SIZE_COUNT - 1; i >= 0; i--)
+        {
+            if (size_presets[i] <= remaining_for_swap)
+            {
+                swap_size = size_presets[i];
+                break;
+            }
+        }
+    }
+
+    // Add swap partition if size is valid.
+    if (swap_size >= MIN_PARTITION_SIZE)
+    {
+        Partition swap = {0};
+        swap.size_bytes = swap_size;
+        strncpy(swap.mount_point, "[swap]", sizeof(swap.mount_point));
+        swap.filesystem = FS_SWAP;
+        swap.type = PART_PRIMARY;
+
+        store->partitions[store->partition_count++] = swap;
+        used_space += swap.size_bytes;
+    }
+
+    // Calculate remaining space for root partition.
+    unsigned long long root_size = disk_size - used_space;
+
+    // Find the largest size preset that fits.
+    int root_index = SIZE_COUNT - 1;
+    for (int i = SIZE_COUNT - 1; i >= 0; i--)
+    {
+        if (size_presets[i] <= root_size)
+        {
+            root_index = i;
+            break;
+        }
+    }
+
+    // Configure root partition with the calculated size.
+    Partition root = {0};
+    root.size_bytes = size_presets[root_index];
+    strncpy(root.mount_point, "/", sizeof(root.mount_point));
+    root.filesystem = FS_EXT4;
+    root.type = PART_PRIMARY;
+
+    // Add root partition to store.
+    store->partitions[store->partition_count++] = root;
 
     return 1;
 }

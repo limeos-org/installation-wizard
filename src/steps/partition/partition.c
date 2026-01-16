@@ -18,9 +18,10 @@ int run_partition_step(WINDOW *modal)
         {"add", "Add"},
         {"edit", "Edit"},
         {"remove", "Remove"},
+        {"autofill", "Autofill"},
         {"done", "Done"}
     };
-    int action_count = 4;
+    int action_count = 5;
     int action_selected = 0;
     int scroll_offset = 0;
 
@@ -88,6 +89,10 @@ int run_partition_step(WINDOW *modal)
                 else if (strcmp(actions[action_selected].value, "remove") == 0)
                 {
                     remove_partition_dialog(modal, store, disk_size);
+                }
+                else if (strcmp(actions[action_selected].value, "autofill") == 0)
+                {
+                    autofill_partitions(store, disk_size);
                 }
                 else if (strcmp(actions[action_selected].value, "done") == 0)
                 {

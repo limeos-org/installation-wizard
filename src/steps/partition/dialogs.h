@@ -42,3 +42,19 @@ int edit_partition_dialog(
 int remove_partition_dialog(
     WINDOW *modal, Store *store, unsigned long long disk_size
 );
+
+/**
+ * Automatically creates an optimal partition layout based on system type.
+ *
+ * Clears existing partitions and creates:
+ * - Boot partition (ESP for UEFI, bios_grub for BIOS+GPT)
+ * - Swap partition (sized based on system RAM)
+ * - Root partition (remaining disk space)
+ *
+ * @param store     The global store to populate with partitions.
+ * @param disk_size Total disk size in bytes.
+ *
+ * @return - `1` - Indicates partitions were created.
+ * @return - `0` - Indicates autofill failed or was cancelled.
+ */
+int autofill_partitions(Store *store, unsigned long long disk_size);

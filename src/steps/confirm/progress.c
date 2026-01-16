@@ -170,7 +170,7 @@ static void render_step_line(
 
 static void await_reboot_with_logs(WINDOW *modal)
 {
-    mvwprintw(modal, 11, 3, "Press Enter to reboot...");
+    mvwprintw(modal, 11, 3, "Success! Press Enter to reboot...");
     wrefresh(modal);
 
     while (1)
@@ -223,10 +223,6 @@ void ncurses_install_progress(
 
         case INSTALL_STEP_FAIL:
             render_step_line(modal, row, step, store->disk, "FAILED", error_code);
-            break;
-
-        case INSTALL_COMPLETE:
-            mvwprintw(modal, 10, 3, "Installation complete!");
             break;
 
         case INSTALL_AWAIT_REBOOT:

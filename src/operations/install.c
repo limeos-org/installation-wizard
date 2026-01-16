@@ -95,7 +95,6 @@ int run_install(install_progress_cb progress_cb, void *context)
     // Cleanup.
     cleanup_mounts();
 
-    NOTIFY(INSTALL_COMPLETE, 0, 0);
     NOTIFY(INSTALL_AWAIT_REBOOT, 0, 0);
 
     // Disable input polling before reboot.

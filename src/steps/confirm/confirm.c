@@ -7,7 +7,7 @@
 
 /** Minimum sizes for boot-related partitions. */
 #define ESP_MIN_SIZE_BYTES      (100ULL * 1000000)
-#define BIOS_GRUB_MIN_SIZE_BYTES (1ULL * 1000000)
+#define BIOS_GRUB_MIN_SIZE_BYTES (2ULL * 1000000)
 #define BOOT_PART_MIN_SIZE_BYTES (300ULL * 1000000)
 
 /** Error codes for boot partition validation. */
@@ -130,7 +130,7 @@ semistatic BootValidationError validate_uefi_boot(Store *store)
 
 /**
  * Validates boot partition configuration for BIOS + GPT systems.
- * Requires bios_grub partition with no filesystem, no mount, size >= 1MB.
+ * Requires bios_grub partition with no filesystem, no mount, size >= 2MB.
  * Forbids ESP partitions.
  */
 semistatic BootValidationError validate_bios_gpt_boot(Store *store)
@@ -307,7 +307,7 @@ static void render_boot_validation_error(WINDOW *modal, BootValidationError err)
             break;
         case BOOT_ERR_BIOS_GPT_NO_BIOS_GRUB:
             msg = "GPT on BIOS requires a BIOS boot partition.\n"
-                  "Add: Size=1MB, Mount=none, Flags=bios_grub";
+                  "Add: Size=2MB, Mount=none, Flags=bios_grub";
             break;
         case BOOT_ERR_BIOS_GPT_BIOS_GRUB_HAS_FS:
             msg = "BIOS boot partition must have no filesystem.\n"
@@ -318,7 +318,7 @@ static void render_boot_validation_error(WINDOW *modal, BootValidationError err)
                   "Go back and set mount to '[none]'.";
             break;
         case BOOT_ERR_BIOS_GPT_BIOS_GRUB_TOO_SMALL:
-            msg = "BIOS boot partition must be at least 1MB.\n"
+            msg = "BIOS boot partition must be at least 2MB.\n"
                   "Go back and resize it.";
             break;
         case BOOT_ERR_BIOS_GPT_HAS_ESP:

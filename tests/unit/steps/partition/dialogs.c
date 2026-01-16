@@ -416,6 +416,126 @@ static void test_has_duplicate_mount_point_duplicate_when_editing(void **state)
     assert_int_equal(1, result);
 }
 
+/** Verifies calculate_ideal_swap_size() returns 4GB for low RAM (4GB). */
+static void test_calculate_ideal_swap_size_low_ram(void **state)
+{
+    (void)state;
+
+    // 4GB RAM should return 4GB swap.
+    unsigned long long result = calculate_ideal_swap_size(4ULL * 1000000000);
+
+    assert_int_equal(4ULL * 1000000000, result);
+}
+
+/** Verifies calculate_ideal_swap_size() returns 4GB for 8GB RAM. */
+static void test_calculate_ideal_swap_size_8gb_ram(void **state)
+{
+    (void)state;
+
+    // 8GB RAM should return 4GB swap.
+    unsigned long long result = calculate_ideal_swap_size(8ULL * 1000000000);
+
+    assert_int_equal(4ULL * 1000000000, result);
+}
+
+/** Verifies calculate_ideal_swap_size() returns 4GB for 16GB RAM. */
+static void test_calculate_ideal_swap_size_16gb_ram(void **state)
+{
+    (void)state;
+
+    // 16GB RAM should return 4GB swap.
+    unsigned long long result = calculate_ideal_swap_size(16ULL * 1000000000);
+
+    assert_int_equal(4ULL * 1000000000, result);
+}
+
+/** Verifies calculate_ideal_swap_size() returns 4GB for 32GB RAM. */
+static void test_calculate_ideal_swap_size_32gb_ram(void **state)
+{
+    (void)state;
+
+    // 32GB RAM should return 4GB swap.
+    unsigned long long result = calculate_ideal_swap_size(32ULL * 1000000000);
+
+    assert_int_equal(4ULL * 1000000000, result);
+}
+
+/** Verifies autofill_partitions() creates a root partition. */
+static void test_autofill_partitions_creates_root(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+
+    // Run autofill with 100GB disk.
+    autofill_partitions(store, 100ULL * 1000000000);
+
+    // Should have at least one partition.
+    assert_true(store->partition_count >= 1);
+
+    // Find root partition.
+    int found_root = 0;
+    for (int i = 0; i < store->partition_count; i++)
+    {
+        if (strcmp(store->partitions[i].mount_point, "/") == 0)
+        {
+            found_root = 1;
+            assert_int_equal(FS_EXT4, store->partitions[i].filesystem);
+            break;
+        }
+    }
+    assert_true(found_root);
+}
+
+/** Verifies autofill_partitions() creates a swap partition. */
+static void test_autofill_partitions_creates_swap(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+
+    // Run autofill with 100GB disk.
+    autofill_partitions(store, 100ULL * 1000000000);
+
+    // Find swap partition.
+    int found_swap = 0;
+    for (int i = 0; i < store->partition_count; i++)
+    {
+        if (strcmp(store->partitions[i].mount_point, "[swap]") == 0)
+        {
+            found_swap = 1;
+            assert_int_equal(FS_SWAP, store->partitions[i].filesystem);
+            break;
+        }
+    }
+    assert_true(found_swap);
+}
+
+/** Verifies autofill_partitions() clears existing partitions. */
+static void test_autofill_partitions_clears_existing(void **state)
+{
+    (void)state;
+    Store *store = get_store();
+
+    // Add some existing partitions.
+    store->partition_count = 2;
+    strncpy(store->partitions[0].mount_point, "/old", STORE_MAX_MOUNT_LEN);
+    strncpy(store->partitions[1].mount_point, "/old2", STORE_MAX_MOUNT_LEN);
+
+    // Run autofill.
+    autofill_partitions(store, 100ULL * 1000000000);
+
+    // Old partitions should be gone.
+    int found_old = 0;
+    for (int i = 0; i < store->partition_count; i++)
+    {
+        if (strstr(store->partitions[i].mount_point, "old") != NULL)
+        {
+            found_old = 1;
+            break;
+        }
+    }
+    assert_false(found_old);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -461,6 +581,17 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_allows_none, setup, teardown),
         cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_excludes_self, setup, teardown),
         cmocka_unit_test_setup_teardown(test_has_duplicate_mount_point_duplicate_when_editing, setup, teardown),
+
+        // calculate_ideal_swap_size tests
+        cmocka_unit_test_setup_teardown(test_calculate_ideal_swap_size_low_ram, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_calculate_ideal_swap_size_8gb_ram, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_calculate_ideal_swap_size_16gb_ram, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_calculate_ideal_swap_size_32gb_ram, setup, teardown),
+
+        // autofill_partitions tests
+        cmocka_unit_test_setup_teardown(test_autofill_partitions_creates_root, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_autofill_partitions_creates_swap, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_autofill_partitions_clears_existing, setup, teardown),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

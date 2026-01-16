@@ -52,3 +52,4 @@ int find_closest_size_index(unsigned long long size);
 int find_mount_index(const char *mount);
 int find_flag_index(int boot, int esp, int bios_grub);
 int has_duplicate_mount_point(Store *store, int mount_index, int edit_index);
+unsigned long long calculate_ideal_swap_size(unsigned long long ram_bytes);
