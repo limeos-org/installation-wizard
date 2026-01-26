@@ -171,30 +171,37 @@ static int write_xinitrc(const Component *component)
     return 0;
 }
 
-static int write_startx_profile(void)
+static int write_xsession(const Component *component)
 {
-    // Ensure profile.d directory exists.
-    if (run_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/etc/profile.d >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    // Ensure /etc/skel exists.
+    if (run_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/etc/skel >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
 
-    // Write startx.sh that auto-starts X on tty1 login.
-    const char *startx_content =
-        "# Auto-start X on tty1 login\n"
-        "if [ -z \"$DISPLAY\" ] && [ \"$(tty)\" = \"/dev/tty1\" ]; then\n"
-        "    exec startx\n"
-        "fi\n";
+    // Write .xsession that launches the window manager.
+    char xsession_content[256];
+    snprintf(
+        xsession_content, sizeof(xsession_content),
+        "#!/bin/sh\nexec /usr/local/bin/%s\n",
+        component->binary_name
+    );
 
     char cmd[1024];
     snprintf(
         cmd, sizeof(cmd),
-        "cat > " CONFIG_TARGET_STARTX_PROFILE_PATH " << 'EOF'\n%sEOF",
-        startx_content
+        "cat > " CONFIG_TARGET_XSESSION_PATH " << 'EOF'\n%sEOF",
+        xsession_content
     );
     if (run_command(cmd) != 0)
     {
         return -2;
+    }
+
+    // Make .xsession executable.
+    if (run_command("chmod +x " CONFIG_TARGET_XSESSION_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    {
+        return -3;
     }
 
     return 0;
@@ -239,8 +246,7 @@ int install_components(void)
         {
             return -3;
         }
-
-        if (write_startx_profile() != 0)
+        if (write_xsession(&CONFIG_COMPONENTS[startup_index]) != 0)
         {
             return -4;
         }

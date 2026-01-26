@@ -36,8 +36,8 @@
 /** Target xinitrc path. */
 #define CONFIG_TARGET_XINITRC_PATH CONFIG_TARGET_MOUNT_POINT "/etc/X11/xinit/xinitrc"
 
-/** Target startx profile path. */
-#define CONFIG_TARGET_STARTX_PROFILE_PATH CONFIG_TARGET_MOUNT_POINT "/etc/profile.d/startx.sh"
+/** Target xsession path (in skel for new users). */
+#define CONFIG_TARGET_XSESSION_PATH CONFIG_TARGET_MOUNT_POINT "/etc/skel/.xsession"
 
 /** A type representing an installable component. */
 typedef struct {
@@ -55,4 +55,5 @@ static const Component CONFIG_COMPONENTS[] = {
 /** The number of installable components. */
 #define CONFIG_COMPONENT_COUNT \
     (int)(sizeof(CONFIG_COMPONENTS) / sizeof(CONFIG_COMPONENTS[0]))
+
 

@@ -1,6 +1,7 @@
 /**
- * This code is responsible for installing and configuring the GRUB bootloader
- * on the target system, supporting both UEFI and BIOS boot modes.
+ * This code is responsible for installing and configuring the bootloader
+ * on the target system. Both UEFI and BIOS systems use GRUB for consistency.
+ * Silent boot is pre-configured in /etc/default/grub.d/ by iso-builder.
  */
 
 #include "../../all.h"
@@ -40,49 +41,14 @@ static int detect_uefi_mode(void)
     return (detect_firmware_type() == FIRMWARE_UEFI);
 }
 
-static int find_esp_partition_index(Store *store)
+static int verify_esp_mounted(void)
 {
-    // Search partitions for one with ESP flag set.
-    for (int i = 0; i < store->partition_count; i++)
-    {
-        if (store->partitions[i].flag_esp)
-        {
-            return i + 1;
-        }
-    }
-    return -1;
-}
-
-static int mount_efi_partition(const char *disk, int esp_partition_index)
-{
-    // Construct the ESP partition device path.
-    char esp_device[128];
-    get_partition_device(disk, esp_partition_index, esp_device, sizeof(esp_device));
-
-    // Escape the device path for shell command.
-    char escaped_device[256];
-    if (shell_escape(esp_device, escaped_device, sizeof(escaped_device)) != 0)
+    // The partitions phase mounts all partitions including ESP.
+    // Just verify it's mounted where we expect.
+    if (run_command("mountpoint -q /mnt/boot/efi") != 0)
     {
         return -1;
     }
-
-    // Create the EFI mount point directory.
-    if (run_command("mkdir -p /mnt/boot/efi") != 0)
-    {
-        return -2;
-    }
-
-    // Mount the EFI system partition.
-    char mount_cmd[256];
-    snprintf(
-        mount_cmd, sizeof(mount_cmd),
-        "mount -t vfat %s /mnt/boot/efi", escaped_device
-    );
-    if (run_command(mount_cmd) != 0)
-    {
-        return -3;
-    }
-
     return 0;
 }
 
@@ -124,7 +90,28 @@ static void unmount_chroot_system_dirs(void)
     run_command("umount /mnt/dev");
 }
 
-static int install_grub_packages(void)
+static int setup_chroot_environment(void)
+{
+    write_install_log("Mounting chroot system directories (dev, proc, sys)");
+    if (mount_chroot_system_dirs() != 0)
+    {
+        write_install_log("Failed to mount chroot system directories");
+        return -1;
+    }
+
+    write_install_log("Verifying chroot environment");
+    if (verify_chroot_works() != 0)
+    {
+        write_install_log("Chroot verification failed");
+        unmount_chroot_system_dirs();
+        return -2;
+    }
+    write_install_log("Chroot environment verified");
+
+    return 0;
+}
+
+static int install_grub_packages(int is_uefi)
 {
     // Ensure target apt cache directory exists.
     if (run_command("mkdir -p /mnt/var/cache/apt/archives >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
@@ -132,16 +119,25 @@ static int install_grub_packages(void)
         return -1;
     }
 
-    // Copy cached packages from live system to target.
-    if (run_command("cp /var/cache/apt/archives/*.deb /mnt/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    // Copy only the appropriate packages based on firmware type.
+    // UEFI uses grub-efi-*, BIOS uses grub-pc-*.
+    const char *cp_cmd = is_uefi
+        ? "cp /var/cache/apt/archives/grub-efi*.deb /mnt/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1"
+        : "cp /var/cache/apt/archives/grub-pc*.deb /mnt/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1";
+    if (run_command(cp_cmd) != 0)
     {
         return -2;
     }
 
     // Install GRUB packages. Run dpkg twice: first pass unpacks all packages,
     // second pass configures them in dependency order.
-    run_command("chroot /mnt dpkg -i /var/cache/apt/archives/*.deb >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
-    if (run_command("chroot /mnt dpkg --configure -a >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    // Note: Inner sh -c ensures the glob expands inside the chroot, not on the host.
+    // Use --no-triggers to prevent dpkg from running initramfs-tools triggers,
+    // which would regenerate initramfs in the chroot (where firmware detection
+    // fails). The pre-built initramfs already has GPU firmware/drivers embedded.
+    run_command("chroot /mnt sh -c 'dpkg -i --no-triggers /var/cache/apt/archives/*.deb' >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
+
+    if (run_command("chroot /mnt dpkg --configure -a --no-triggers >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }
@@ -151,20 +147,26 @@ static int install_grub_packages(void)
 
 static int run_grub_install(const char *disk, int is_uefi)
 {
-    char cmd[512];
-
     if (is_uefi)
     {
         // Install GRUB for UEFI target with EFI directory.
-        snprintf(
-            cmd, sizeof(cmd),
-            "chroot /mnt /usr/sbin/grub-install "
+        if (run_command("chroot /mnt /usr/sbin/grub-install "
             "--target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB "
-            ">>" CONFIG_INSTALL_LOG_PATH " 2>&1"
-        );
-        if (run_command(cmd) != 0)
+            ">>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
         {
             return -1;
+        }
+
+        // Create fallback boot path. UEFI looks for /EFI/BOOT/BOOTX64.EFI when
+        // no NVRAM boot entry exists. efibootmgr can't create NVRAM entries in
+        // a chroot (no access to efivars), so we must provide this fallback.
+        if (run_command("mkdir -p /mnt/boot/efi/EFI/BOOT") != 0)
+        {
+            return -4;
+        }
+        if (run_command("cp /mnt/boot/efi/EFI/GRUB/grubx64.efi /mnt/boot/efi/EFI/BOOT/BOOTX64.EFI") != 0)
+        {
+            return -5;
         }
     }
     else
@@ -177,11 +179,10 @@ static int run_grub_install(const char *disk, int is_uefi)
         }
 
         // Install GRUB to disk MBR for BIOS boot.
-        snprintf(
-            cmd, sizeof(cmd),
+        char cmd[512];
+        snprintf(cmd, sizeof(cmd),
             "chroot /mnt /usr/sbin/grub-install %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
-            escaped_disk
-        );
+            escaped_disk);
         if (run_command(cmd) != 0)
         {
             return -3;
@@ -201,6 +202,83 @@ static int run_update_grub(void)
     return 0;
 }
 
+static int setup_grub_bios(const char *disk)
+{
+    if (setup_chroot_environment() != 0)
+    {
+        return -1;
+    }
+
+    // Install GRUB packages for BIOS.
+    write_install_log("Installing GRUB BIOS packages from apt cache");
+    if (install_grub_packages(0) != 0)
+    {
+        write_install_log("Failed to install GRUB packages");
+        return -3;
+    }
+
+    // Run grub-install for BIOS.
+    write_install_log("Running grub-install for BIOS");
+    if (run_grub_install(disk, 0) != 0)
+    {
+        write_install_log("grub-install failed");
+        return -4;
+    }
+
+    // Generate GRUB configuration.
+    write_install_log("Running update-grub to generate configuration");
+    if (run_update_grub() != 0)
+    {
+        write_install_log("update-grub failed");
+        return -5;
+    }
+
+    return 0;
+}
+
+static int setup_grub_uefi(const char *disk)
+{
+    // Verify ESP is mounted (partitions phase handles mounting).
+    write_install_log("Verifying ESP is mounted at /mnt/boot/efi");
+    if (verify_esp_mounted() != 0)
+    {
+        write_install_log("ESP not mounted at /mnt/boot/efi");
+        return -1;
+    }
+
+    if (setup_chroot_environment() != 0)
+    {
+        return -2;
+    }
+
+    // Install GRUB packages for UEFI.
+    write_install_log("Installing GRUB EFI packages from apt cache");
+    if (install_grub_packages(1) != 0)
+    {
+        write_install_log("Failed to install GRUB packages");
+        return -4;
+    }
+
+    // Run grub-install for UEFI and create fallback boot path.
+    write_install_log("Running grub-install for UEFI");
+    if (run_grub_install(disk, 1) != 0)
+    {
+        write_install_log("grub-install failed");
+        return -5;
+    }
+    write_install_log("Created fallback boot path at /boot/efi/EFI/BOOT/BOOTX64.EFI");
+
+    // Generate GRUB configuration.
+    write_install_log("Running update-grub to generate configuration");
+    if (run_update_grub() != 0)
+    {
+        write_install_log("update-grub failed");
+        return -6;
+    }
+
+    return 0;
+}
+
 int setup_bootloader(void)
 {
     Store *store = get_store();
@@ -210,68 +288,23 @@ int setup_bootloader(void)
     int is_uefi = detect_uefi_mode();
     write_install_log("Boot mode: %s", is_uefi ? "UEFI" : "BIOS");
 
-    // Mount EFI partition if running in UEFI mode.
+    int result;
     if (is_uefi)
     {
-        int esp_index = find_esp_partition_index(store);
-        if (esp_index > 0)
-        {
-            write_install_log("ESP partition found at index %d", esp_index);
-            write_install_log("Mounting EFI partition to /mnt/boot/efi");
-            if (mount_efi_partition(disk, esp_index) != 0)
-            {
-                write_install_log("Failed to mount EFI partition");
-                return -1;
-            }
-        }
-        else
-        {
-            write_install_log("Warning: UEFI mode but no ESP partition found");
-        }
+        write_install_log("Using GRUB for UEFI");
+        result = setup_grub_uefi(disk);
+    }
+    else
+    {
+        write_install_log("Using GRUB for BIOS");
+        result = setup_grub_bios(disk);
     }
 
-    // Bind mount system directories for chroot.
-    write_install_log("Mounting chroot system directories (dev, proc, sys)");
-    if (mount_chroot_system_dirs() != 0)
+    if (result != 0)
     {
-        write_install_log("Failed to mount chroot system directories");
-        return -2;
+        return result;
     }
 
-    // Verify chroot environment is functional.
-    write_install_log("Verifying chroot environment");
-    if (verify_chroot_works() != 0)
-    {
-        write_install_log("Chroot verification failed");
-        unmount_chroot_system_dirs();
-        return -3;
-    }
-    write_install_log("Chroot environment verified");
-
-    // Install GRUB packages.
-    write_install_log("Installing GRUB packages from apt cache");
-    if (install_grub_packages() != 0)
-    {
-        write_install_log("Failed to install GRUB packages");
-        return -4;
-    }
-
-    // Run grub-install.
-    write_install_log("Running grub-install for %s", is_uefi ? "UEFI" : "BIOS");
-    if (run_grub_install(disk, is_uefi) != 0)
-    {
-        write_install_log("grub-install failed");
-        return -5;
-    }
-
-    // Generate GRUB configuration.
-    write_install_log("Running update-grub to generate configuration");
-    if (run_update_grub() != 0)
-    {
-        write_install_log("update-grub failed");
-        return -6;
-    }
     write_install_log("Bootloader installation complete");
-
     return 0;
 }

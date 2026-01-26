@@ -13,8 +13,8 @@ const Phase install_phases[INSTALL_PHASE_COUNT] = {
     { "Fstab",        "Generating fstab",        generate_fstab      },
     { "Bootloader",   "Installing bootloader",   setup_bootloader    },
     { "Locale",       "Configuring locale",      configure_locale    },
-    { "Users",        "Configuring users",       configure_users     },
     { "Components",   "Installing components",   install_components  },
+    { "Users",        "Configuring users",       configure_users     },
 };
 
 #define NOTIFY(event, phase_index, err) \

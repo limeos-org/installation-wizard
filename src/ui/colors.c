@@ -9,7 +9,7 @@
 
 /** The custom RGB values for the 8 color slots. */
 static const unsigned char palette[8][3] = {
-    [COLOR_BLACK]   = {0x1C, 0x1C, 0x1C},  // Dark gray (screen background)
+    [COLOR_BLACK]   = {0x00, 0x00, 0x00},  // Black (screen background)
     [COLOR_RED]     = {0xE6, 0x33, 0x33},  // Red (errors)
     [COLOR_GREEN]   = {0xD6, 0xD6, 0xD0},  // Light gray (row background)
     [COLOR_YELLOW]  = {0xB3, 0xB3, 0xAD},  // Medium gray (header background)
