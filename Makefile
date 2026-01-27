@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g -MMD -MP
 LIBS = -lncurses
 
 # Build Configuration
