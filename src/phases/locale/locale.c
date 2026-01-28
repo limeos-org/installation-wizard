@@ -57,13 +57,13 @@ int configure_locale(void)
     snprintf(cmd, sizeof(cmd),
         "sed -i '/^# %s/s/^# //' /mnt/etc/locale.gen >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
         store->locale);
-    if (run_command(cmd) != 0)
+    if (run_install_command(cmd) != 0)
     {
         return -2;
     }
 
     // Generate locales inside the chroot.
-    if (run_command("chroot /mnt /usr/sbin/locale-gen >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("chroot /mnt /usr/sbin/locale-gen >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }
@@ -74,7 +74,7 @@ int configure_locale(void)
         "echo 'LANG=%s' > /mnt/etc/default/locale",
         store->locale
     );
-    if (run_command(cmd) != 0)
+    if (run_install_command(cmd) != 0)
     {
         return -4;
     }

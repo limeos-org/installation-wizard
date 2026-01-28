@@ -67,7 +67,9 @@ int run_install(install_progress_cb progress_cb, void *context)
     // Disable tick updates before reboot.
     set_command_tick_callback(NULL);
 
-    run_command("reboot >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
+    // Reboot the system.
+    run_install_command("reboot >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
+    
     close_dry_run_log();
 
     return 0;

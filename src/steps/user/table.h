@@ -1,9 +1,7 @@
 #pragma once
 #include "../../all.h"
 
-/**
- * Maximum number of user rows visible in the table.
- */
+/** Maximum number of user rows visible in the table. */
 #define MAX_VISIBLE_USERS 3
 
 /** The column width for user number. */

@@ -4,6 +4,9 @@
 /**
  * Executes a shell command, or logs it if dry run mode is enabled.
  *
+ * Wraps common lib's `run_command()` with dry-run logging and periodic tick
+ * callback support for UI updates during long-running commands.
+ *
  * In dry run mode, commands are written to CONFIG_DRY_RUN_LOG_PATH instead of
  * being executed, and the function returns 0 (success).
  *
@@ -12,7 +15,7 @@
  * @return - `0` - Success (or dry run mode).
  * @return - `non-zero` - The return value of system() on failure.
  */
-int run_command(const char *command);
+int run_install_command(const char *command);
 
 /**
  * Closes the dry run log file if open.
@@ -34,17 +37,3 @@ typedef void (*CommandTickCallback)(void);
  */
 void set_command_tick_callback(CommandTickCallback callback);
 
-/**
- * Escapes a string for safe use in shell commands.
- *
- * Wraps the input in single quotes and escapes any embedded single quotes
- * using the '\'' technique (end quote, literal quote, start quote).
- *
- * @param input The string to escape.
- * @param output Buffer to write the escaped string.
- * @param output_size Size of the output buffer.
- *
- * @return - `0` - Success.
- * @return - `-1` - Output buffer too small.
- */
-int shell_escape(const char *input, char *output, size_t output_size);

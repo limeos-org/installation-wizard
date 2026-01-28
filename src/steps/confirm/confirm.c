@@ -28,9 +28,9 @@ typedef enum {
     BOOT_ERR_BOOT_IS_BIOS_GRUB
 } BootValidationError;
 
+/** Checks if a root partition (mounted at /) exists. */
 semistatic int has_root_partition(Store *store)
 {
-    // Search for a partition with root mount point.
     for (int i = 0; i < store->partition_count; i++)
     {
         if (strcmp(store->partitions[i].mount_point, "/") == 0)
@@ -45,7 +45,6 @@ semistatic int has_root_partition(Store *store)
 /** Finds a partition with the ESP flag set. */
 static Partition *find_esp_partition(Store *store)
 {
-    // Search for a partition with the ESP flag enabled.
     for (int i = 0; i < store->partition_count; i++)
     {
         if (store->partitions[i].flag_esp)
@@ -60,7 +59,6 @@ static Partition *find_esp_partition(Store *store)
 /** Finds a partition with the bios_grub flag set. */
 static Partition *find_bios_grub_partition(Store *store)
 {
-    // Search for a partition with the bios_grub flag enabled.
     for (int i = 0; i < store->partition_count; i++)
     {
         if (store->partitions[i].flag_bios_grub)
@@ -75,7 +73,6 @@ static Partition *find_bios_grub_partition(Store *store)
 /** Finds a partition mounted at /boot. */
 static Partition *find_boot_partition(Store *store)
 {
-    // Search for a partition with /boot mount point.
     for (int i = 0; i < store->partition_count; i++)
     {
         if (strcmp(store->partitions[i].mount_point, "/boot") == 0)
@@ -169,8 +166,9 @@ semistatic BootValidationError validate_bios_gpt_boot(Store *store)
     return BOOT_OK;
 }
 
-semistatic BootValidationError validate_bios_mbr_boot(Store *store)
+static BootValidationError validate_bios_mbr_boot(Store *store)
 {
+    // No specific boot partition requirements for BIOS + MBR.
     (void)store;
     return BOOT_OK;
 }

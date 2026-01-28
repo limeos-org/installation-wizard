@@ -18,7 +18,7 @@ static int create_gpt_table(const char *disk)
     char command[512];
     snprintf(command, sizeof(command), "parted -s %s mklabel gpt >>" CONFIG_INSTALL_LOG_PATH " 2>&1", escaped_disk);
 
-    return run_command(command) == 0 ? 0 : -2;
+    return run_install_command(command) == 0 ? 0 : -2;
 }
 
 static int create_partition_entries(const char *disk, Store *store)
@@ -52,7 +52,7 @@ static int create_partition_entries(const char *disk, Store *store)
             (partition->type == PART_PRIMARY) ? "primary" : "logical",
             start_mb, end_mb
         );
-        if (run_command(command) != 0)
+        if (run_install_command(command) != 0)
         {
             return -2;
         }
@@ -65,7 +65,7 @@ static int create_partition_entries(const char *disk, Store *store)
                 "parted -s %s set %d boot on >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
                 escaped_disk, i + 1
             );
-            if (run_command(command) != 0)
+            if (run_install_command(command) != 0)
             {
                 return -3;
             }
@@ -79,7 +79,7 @@ static int create_partition_entries(const char *disk, Store *store)
                 "parted -s %s set %d esp on >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
                 escaped_disk, i + 1
             );
-            if (run_command(command) != 0)
+            if (run_install_command(command) != 0)
             {
                 return -4;
             }
@@ -93,7 +93,7 @@ static int create_partition_entries(const char *disk, Store *store)
                 "parted -s %s set %d bios_grub on >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
                 escaped_disk, i + 1
             );
-            if (run_command(command) != 0)
+            if (run_install_command(command) != 0)
             {
                 return -5;
             }
@@ -151,7 +151,7 @@ static int format_partitions(const char *disk, Store *store)
         write_install_log("Formatting %s as %s", partition_device, fs_name);
 
         // Execute formatting command.
-        if (run_command(command) != 0)
+        if (run_install_command(command) != 0)
         {
             return -2;
         }
@@ -190,7 +190,7 @@ static int mount_root_partition(const char *disk, int root_index)
     char command[512];
     snprintf(command, sizeof(command), "mount %s /mnt >>" CONFIG_INSTALL_LOG_PATH " 2>&1", escaped_device);
 
-    return run_command(command) == 0 ? 0 : -2;
+    return run_install_command(command) == 0 ? 0 : -2;
 }
 
 static int mount_remaining_partitions(const char *disk, Store *store)
@@ -219,7 +219,7 @@ static int mount_remaining_partitions(const char *disk, Store *store)
             write_install_log("Enabling swap on %s", partition_device);
             char command[512];
             snprintf(command, sizeof(command), "swapon %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1", escaped_device);
-            if (run_command(command) != 0)
+            if (run_install_command(command) != 0)
             {
                 write_install_log("Warning: failed to enable swap on %s", partition_device);
             }
@@ -253,7 +253,7 @@ static int mount_remaining_partitions(const char *disk, Store *store)
                 "mkdir -p %s && mount %s %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
                 escaped_mount, escaped_device, escaped_mount
             );
-            if (run_command(command) != 0)
+            if (run_install_command(command) != 0)
             {
                 write_install_log("Warning: failed to mount %s at %s", partition_device, mount_path);
             }

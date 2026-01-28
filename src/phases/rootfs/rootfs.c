@@ -23,7 +23,7 @@ int extract_rootfs(void)
     // Extract the rootfs archive to /mnt.
     // Note: Root partition is already mounted by create_partitions().
     write_install_log("Extracting rootfs to /mnt");
-    if (run_command("tar -xzf " CONFIG_ROOTFS_TARBALL_PATH " -C /mnt >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("tar -xzf " CONFIG_ROOTFS_TARBALL_PATH " -C /mnt >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         write_install_log("Rootfs extraction failed");
         return -2;

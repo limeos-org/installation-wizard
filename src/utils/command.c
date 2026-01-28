@@ -13,7 +13,7 @@ void set_command_tick_callback(CommandTickCallback callback)
     tick_callback = callback;
 }
 
-int run_command(const char *command)
+int run_install_command(const char *command)
 {
     Store *store = get_store();
 
@@ -35,18 +35,18 @@ int run_command(const char *command)
         return 0;
     }
 
-    // If no tick callback, use simple blocking execution.
+    // If no tick callback, delegate directly to core-lib.
     if (!tick_callback)
     {
-        return system(command);
+        return run_command(command);
     }
 
     // Fork and exec to allow periodic updates during execution.
     pid_t pid = fork();
     if (pid < 0)
     {
-        // Fork failed, fall back to system().
-        return system(command);
+        // Fork failed, fall back to core-lib.
+        return run_command(command);
     }
 
     if (pid == 0)
@@ -94,50 +94,4 @@ void close_dry_run_log(void)
         fclose(dry_run_log);
         dry_run_log = NULL;
     }
-}
-
-int shell_escape(const char *input, char *output, size_t output_size)
-{
-    if (input == NULL || output == NULL || output_size < 3)
-    {
-        return -1;
-    }
-
-    size_t out_pos = 0;
-    size_t in_len = strlen(input);
-
-    // Add opening quote to output.
-    output[out_pos++] = '\'';
-
-    // Process each character in input.
-    for (size_t i = 0; i < in_len; i++)
-    {
-        if (input[i] == '\'')
-        {
-            // Need 4 chars for '\'' plus space for closing quote.
-            if (out_pos + 5 > output_size)
-            {
-                return -1;
-            }
-            output[out_pos++] = '\'';
-            output[out_pos++] = '\\';
-            output[out_pos++] = '\'';
-            output[out_pos++] = '\'';
-        }
-        else
-        {
-            // Need space for this char plus closing quote and null.
-            if (out_pos + 3 > output_size)
-            {
-                return -1;
-            }
-            output[out_pos++] = input[i];
-        }
-    }
-
-    // Closing quote and null terminator.
-    output[out_pos++] = '\'';
-    output[out_pos] = '\0';
-
-    return 0;
 }

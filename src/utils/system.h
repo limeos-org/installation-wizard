@@ -2,8 +2,7 @@
 #include "../all.h"
 
 /** A type representing system chassis types. */
-typedef enum
-{
+typedef enum {
     CHASSIS_DESKTOP,
     CHASSIS_LAPTOP,
     CHASSIS_UNKNOWN

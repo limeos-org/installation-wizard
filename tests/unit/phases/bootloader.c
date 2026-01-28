@@ -134,7 +134,7 @@ static void test_setup_bootloader_verifies_chroot(void **state)
     assert_true(log_contains(lines, count, "rm -f '/mnt/tmp/.chroot_verify'"));
 }
 
-/** Verifies setup_bootloader() copies packages from apt cache. */
+/** Verifies setup_bootloader() copies BIOS packages from apt cache. */
 static void test_setup_bootloader_bios_copies_packages(void **state)
 {
     (void)state;
@@ -155,11 +155,11 @@ static void test_setup_bootloader_bios_copies_packages(void **state)
     char lines[64][512];
     int count = read_dry_run_log(lines, 64);
 
-    // Should copy packages from apt cache to target.
-    assert_true(log_contains(lines, count, "cp /var/cache/apt/archives/*.deb /mnt/var/cache/apt/archives/"));
+    // Should copy grub-pc packages from apt cache to target.
+    assert_true(log_contains(lines, count, "cp /var/cache/apt/archives/grub-pc*.deb /mnt/var/cache/apt/archives/"));
 }
 
-/** Verifies setup_bootloader() copies packages from apt cache in UEFI mode. */
+/** Verifies setup_bootloader() copies EFI packages from apt cache in UEFI mode. */
 static void test_setup_bootloader_uefi_copies_packages(void **state)
 {
     (void)state;
@@ -188,8 +188,8 @@ static void test_setup_bootloader_uefi_copies_packages(void **state)
     char lines[64][512];
     int count = read_dry_run_log(lines, 64);
 
-    // Should copy packages from apt cache to target.
-    assert_true(log_contains(lines, count, "cp /var/cache/apt/archives/*.deb /mnt/var/cache/apt/archives/"));
+    // Should copy grub-efi packages from apt cache to target.
+    assert_true(log_contains(lines, count, "cp /var/cache/apt/archives/grub-efi*.deb /mnt/var/cache/apt/archives/"));
 }
 
 /** Verifies setup_bootloader() installs packages via dpkg in chroot. */
@@ -212,8 +212,8 @@ static void test_setup_bootloader_installs_packages(void **state)
     char lines[64][512];
     int count = read_dry_run_log(lines, 64);
 
-    // Should install packages via dpkg in chroot.
-    assert_true(log_contains(lines, count, "dpkg -i /var/cache/apt/archives/*.deb"));
+    // Should install packages via dpkg with --no-triggers in chroot.
+    assert_true(log_contains(lines, count, "dpkg -i --no-triggers /var/cache/apt/archives/*.deb"));
 }
 
 /** Verifies setup_bootloader() runs grub-install with disk path in BIOS mode. */

@@ -20,18 +20,18 @@ static int verify_chroot_works(void)
     // Create marker file inside chroot /mnt.
     char cmd[256];
     snprintf(cmd, sizeof(cmd), "echo 'limeos' > %s", escaped_marker);
-    if (run_command(cmd) != 0)
+    if (run_install_command(cmd) != 0)
     {
         return -2;
     }
 
     // Verify chroot can see the marker at /tmp/.chroot_verify (not /mnt/tmp).
     // If chroot fails silently, cat would look at the host's /tmp and fail.
-    int result = run_command("chroot /mnt cat /tmp/.chroot_verify >/dev/null 2>&1");
+    int result = run_install_command("chroot /mnt cat /tmp/.chroot_verify >/dev/null 2>&1");
 
     // Clean up marker file.
     snprintf(cmd, sizeof(cmd), "rm -f %s", escaped_marker);
-    run_command(cmd);
+    run_install_command(cmd);
 
     return (result == 0) ? 0 : -3;
 }
@@ -45,7 +45,7 @@ static int verify_esp_mounted(void)
 {
     // The partitions phase mounts all partitions including ESP.
     // Just verify it's mounted where we expect.
-    if (run_command("mountpoint -q /mnt/boot/efi") != 0)
+    if (run_install_command("mountpoint -q /mnt/boot/efi") != 0)
     {
         return -1;
     }
@@ -55,23 +55,23 @@ static int verify_esp_mounted(void)
 static int mount_chroot_system_dirs(void)
 {
     // Bind mount /dev for device access inside chroot.
-    if (run_command("mount --bind /dev /mnt/dev") != 0)
+    if (run_install_command("mount --bind /dev /mnt/dev") != 0)
     {
         return -1;
     }
 
     // Mount proc filesystem for process information.
-    if (run_command("mount -t proc proc /mnt/proc") != 0)
+    if (run_install_command("mount -t proc proc /mnt/proc") != 0)
     {
-        run_command("umount /mnt/dev");
+        run_install_command("umount /mnt/dev");
         return -2;
     }
 
     // Mount sysfs for kernel and device information.
-    if (run_command("mount -t sysfs sys /mnt/sys") != 0)
+    if (run_install_command("mount -t sysfs sys /mnt/sys") != 0)
     {
-        run_command("umount /mnt/proc");
-        run_command("umount /mnt/dev");
+        run_install_command("umount /mnt/proc");
+        run_install_command("umount /mnt/dev");
         return -3;
     }
 
@@ -81,13 +81,13 @@ static int mount_chroot_system_dirs(void)
 static void unmount_chroot_system_dirs(void)
 {
     // Unmount sysfs.
-    run_command("umount /mnt/sys");
+    run_install_command("umount /mnt/sys");
 
     // Unmount proc filesystem.
-    run_command("umount /mnt/proc");
+    run_install_command("umount /mnt/proc");
 
     // Unmount /dev bind mount.
-    run_command("umount /mnt/dev");
+    run_install_command("umount /mnt/dev");
 }
 
 static int setup_chroot_environment(void)
@@ -106,6 +106,7 @@ static int setup_chroot_environment(void)
         unmount_chroot_system_dirs();
         return -2;
     }
+    
     write_install_log("Chroot environment verified");
 
     return 0;
@@ -114,7 +115,7 @@ static int setup_chroot_environment(void)
 static int install_grub_packages(int is_uefi)
 {
     // Ensure target apt cache directory exists.
-    if (run_command("mkdir -p /mnt/var/cache/apt/archives >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("mkdir -p /mnt/var/cache/apt/archives >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
@@ -124,7 +125,7 @@ static int install_grub_packages(int is_uefi)
     const char *cp_cmd = is_uefi
         ? "cp /var/cache/apt/archives/grub-efi*.deb /mnt/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1"
         : "cp /var/cache/apt/archives/grub-pc*.deb /mnt/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1";
-    if (run_command(cp_cmd) != 0)
+    if (run_install_command(cp_cmd) != 0)
     {
         return -2;
     }
@@ -135,9 +136,10 @@ static int install_grub_packages(int is_uefi)
     // Use --no-triggers to prevent dpkg from running initramfs-tools triggers,
     // which would regenerate initramfs in the chroot (where firmware detection
     // fails). The pre-built initramfs already has GPU firmware/drivers embedded.
-    run_command("chroot /mnt sh -c 'dpkg -i --no-triggers /var/cache/apt/archives/*.deb' >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
+    run_install_command("chroot /mnt sh -c 'dpkg -i --no-triggers /var/cache/apt/archives/*.deb' >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
 
-    if (run_command("chroot /mnt dpkg --configure -a --no-triggers >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    // Configure installed packages.
+    if (run_install_command("chroot /mnt dpkg --configure -a --no-triggers >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }
@@ -150,7 +152,7 @@ static int run_grub_install(const char *disk, int is_uefi)
     if (is_uefi)
     {
         // Install GRUB for UEFI target with EFI directory.
-        if (run_command("chroot /mnt /usr/sbin/grub-install "
+        if (run_install_command("chroot /mnt /usr/sbin/grub-install "
             "--target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB "
             ">>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
         {
@@ -160,11 +162,11 @@ static int run_grub_install(const char *disk, int is_uefi)
         // Create fallback boot path. UEFI looks for /EFI/BOOT/BOOTX64.EFI when
         // no NVRAM boot entry exists. efibootmgr can't create NVRAM entries in
         // a chroot (no access to efivars), so we must provide this fallback.
-        if (run_command("mkdir -p /mnt/boot/efi/EFI/BOOT") != 0)
+        if (run_install_command("mkdir -p /mnt/boot/efi/EFI/BOOT") != 0)
         {
             return -4;
         }
-        if (run_command("cp /mnt/boot/efi/EFI/GRUB/grubx64.efi /mnt/boot/efi/EFI/BOOT/BOOTX64.EFI") != 0)
+        if (run_install_command("cp /mnt/boot/efi/EFI/GRUB/grubx64.efi /mnt/boot/efi/EFI/BOOT/BOOTX64.EFI") != 0)
         {
             return -5;
         }
@@ -183,7 +185,7 @@ static int run_grub_install(const char *disk, int is_uefi)
         snprintf(cmd, sizeof(cmd),
             "chroot /mnt /usr/sbin/grub-install %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
             escaped_disk);
-        if (run_command(cmd) != 0)
+        if (run_install_command(cmd) != 0)
         {
             return -3;
         }
@@ -195,10 +197,11 @@ static int run_grub_install(const char *disk, int is_uefi)
 static int run_update_grub(void)
 {
     // Run update-grub inside chroot to (re)generate GRUB config.
-    if (run_command("chroot /mnt /usr/sbin/update-grub >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("chroot /mnt /usr/sbin/update-grub >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
+
     return 0;
 }
 
@@ -306,5 +309,6 @@ int setup_bootloader(void)
     }
 
     write_install_log("Bootloader installation complete");
+
     return 0;
 }

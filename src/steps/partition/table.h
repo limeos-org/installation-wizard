@@ -1,9 +1,7 @@
 #pragma once
 #include "../../all.h"
 
-/**
- * Maximum number of partition rows visible in the table.
- */
+/** Maximum number of partition rows visible in the table. */
 #define MAX_VISIBLE_PARTITIONS 3
 
 /** The column width for partition number. */

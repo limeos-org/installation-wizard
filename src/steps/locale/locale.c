@@ -80,10 +80,16 @@ int populate_locale_options(StepOption *out_options, int max_count)
         if (count > max_count) count = max_count;
         for (int i = 0; i < count; i++)
         {
-            snprintf(out_options[i].value, sizeof(out_options[i].value),
-                     "%s", store->locales[i].value);
-            snprintf(out_options[i].label, sizeof(out_options[i].label),
-                     "%s", store->locales[i].label);
+            snprintf(
+                out_options[i].value, sizeof(out_options[i].value),
+                "%s",
+                store->locales[i].value
+            );
+            snprintf(
+                out_options[i].label, sizeof(out_options[i].label),
+                "%s",
+                store->locales[i].label
+            );
         }
         return count;
     }
@@ -155,10 +161,16 @@ int populate_locale_options(StepOption *out_options, int max_count)
     store->locale_count = count;
     for (int i = 0; i < count; i++)
     {
-        snprintf(store->locales[i].value, sizeof(store->locales[i].value),
-                 "%s", out_options[i].value);
-        snprintf(store->locales[i].label, sizeof(store->locales[i].label),
-                 "%s", out_options[i].label);
+        snprintf(
+            store->locales[i].value, sizeof(store->locales[i].value),
+            "%s",
+            out_options[i].value
+        );
+        snprintf(
+            store->locales[i].label, sizeof(store->locales[i].label),
+            "%s",
+            out_options[i].label
+        );
     }
 
     return count;

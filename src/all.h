@@ -27,12 +27,13 @@
 #include <dlfcn.h>
 #include <sys/mount.h>
 
+#include <limeos-common-lib.h>
 #include "constants.h"
 #include "config.h"
+
 #include "store/store.h"
 #include "utils/command.h"
 #include "utils/disk.h"
-#include "utils/dependencies.h"
 #include "utils/system.h"
 #include "utils/hostname.h"
 #include "utils/install_log.h"

@@ -271,19 +271,6 @@ static void test_validate_bios_gpt_boot_has_esp(void **state)
     assert_int_equal(BOOT_ERR_BIOS_GPT_HAS_ESP, result);
 }
 
-/** Verifies validate_bios_mbr_boot() always returns OK. */
-static void test_validate_bios_mbr_boot_ok(void **state)
-{
-    (void)state;
-    Store *store = get_store();
-    store->partition_count = 1;
-    strncpy(store->partitions[0].mount_point, "/", MAX_MOUNT_LEN);
-
-    BootValidationError result = validate_bios_mbr_boot(store);
-
-    assert_int_equal(BOOT_OK, result);
-}
-
 /** Verifies validate_optional_boot() returns OK when no /boot. */
 static void test_validate_optional_boot_no_boot(void **state)
 {
@@ -464,9 +451,6 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_validate_bios_gpt_boot_has_mount, setup, teardown),
         cmocka_unit_test_setup_teardown(test_validate_bios_gpt_boot_too_small, setup, teardown),
         cmocka_unit_test_setup_teardown(test_validate_bios_gpt_boot_has_esp, setup, teardown),
-
-        // validate_bios_mbr_boot tests
-        cmocka_unit_test_setup_teardown(test_validate_bios_mbr_boot_ok, setup, teardown),
 
         // validate_optional_boot tests
         cmocka_unit_test_setup_teardown(test_validate_optional_boot_no_boot, setup, teardown),

@@ -24,27 +24,27 @@ static int teardown(void **state)
     return 0;
 }
 
-/** Verifies run_command() returns zero in dry-run mode. */
-static void test_run_command_dry_run_returns_zero(void **state)
+/** Verifies run_install_command() returns zero in dry-run mode. */
+static void test_run_install_command_dry_run_returns_zero(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 1;
 
-    int result = run_command("echo test");
+    int result = run_install_command("echo test");
 
     // Dry-run mode should always return success.
     assert_int_equal(0, result);
 }
 
-/** Verifies run_command() creates a log file in dry-run mode. */
-static void test_run_command_dry_run_creates_log_file(void **state)
+/** Verifies run_install_command() creates a log file in dry-run mode. */
+static void test_run_install_command_dry_run_creates_log_file(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 1;
 
-    run_command("echo test");
+    run_install_command("echo test");
     close_dry_run_log();
 
     // Verify log file was created.
@@ -53,14 +53,14 @@ static void test_run_command_dry_run_creates_log_file(void **state)
     fclose(file);
 }
 
-/** Verifies run_command() logs the exact command string in dry-run mode. */
-static void test_run_command_dry_run_logs_command(void **state)
+/** Verifies run_install_command() logs the exact command string in dry-run mode. */
+static void test_run_install_command_dry_run_logs_command(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 1;
 
-    run_command("parted /dev/sda mklabel gpt");
+    run_install_command("parted /dev/sda mklabel gpt");
     close_dry_run_log();
 
     // Read log file and verify command was written.
@@ -75,17 +75,17 @@ static void test_run_command_dry_run_logs_command(void **state)
     assert_string_equal("parted /dev/sda mklabel gpt\n", buffer);
 }
 
-/** Verifies run_command() logs multiple commands on separate lines. */
-static void test_run_command_dry_run_logs_multiple_commands(void **state)
+/** Verifies run_install_command() logs multiple commands on separate lines. */
+static void test_run_install_command_dry_run_logs_multiple_commands(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 1;
 
     // Execute multiple commands.
-    run_command("command1");
-    run_command("command2");
-    run_command("command3");
+    run_install_command("command1");
+    run_install_command("command2");
+    run_install_command("command3");
     close_dry_run_log();
 
     // Count lines in log file.
@@ -104,41 +104,41 @@ static void test_run_command_dry_run_logs_multiple_commands(void **state)
 }
 
 /**
- * Verifies run_command() executes and returns success for successful commands.
+ * Verifies run_install_command() executes and returns success for successful commands.
  */
-static void test_run_command_not_dry_run_executes_command(void **state)
+static void test_run_install_command_not_dry_run_executes_command(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 0;
 
     // The 'true' command always succeeds.
-    int result = run_command("true");
+    int result = run_install_command("true");
 
     assert_int_equal(0, result);
 }
 
-/** Verifies run_command() returns non-zero for failed commands. */
-static void test_run_command_not_dry_run_returns_failure(void **state)
+/** Verifies run_install_command() returns non-zero for failed commands. */
+static void test_run_install_command_not_dry_run_returns_failure(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 0;
 
     // The 'false' command always fails.
-    int result = run_command("false");
+    int result = run_install_command("false");
 
     assert_int_not_equal(0, result);
 }
 
-/** Verifies run_command() does not create a log file in normal mode. */
-static void test_run_command_not_dry_run_no_log_file(void **state)
+/** Verifies run_install_command() does not create a log file in normal mode. */
+static void test_run_install_command_not_dry_run_no_log_file(void **state)
 {
     (void)state;
     Store *store = get_store();
     store->dry_run = 0;
 
-    run_command("true");
+    run_install_command("true");
 
     // Verify no log file was created in normal mode.
     assert_int_not_equal(0, access(CONFIG_DRY_RUN_LOG_PATH, F_OK));
@@ -159,7 +159,7 @@ static void test_close_dry_run_log_safe_when_not_open(void **state)
     close_dry_run_log();
 
     // Verify system still works: can create new log after multiple closes.
-    run_command("test command after close");
+    run_install_command("test command after close");
     close_dry_run_log();
 
     FILE *file = fopen(CONFIG_DRY_RUN_LOG_PATH, "r");
@@ -180,7 +180,7 @@ static void test_close_dry_run_log_flushes_content(void **state)
     Store *store = get_store();
     store->dry_run = 1;
 
-    run_command("test command");
+    run_install_command("test command");
     close_dry_run_log();
 
     // Verify content was flushed to disk.
@@ -291,13 +291,13 @@ static void test_shell_escape_special_chars(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test_setup_teardown(test_run_command_dry_run_returns_zero, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_command_dry_run_creates_log_file, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_command_dry_run_logs_command, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_command_dry_run_logs_multiple_commands, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_command_not_dry_run_executes_command, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_command_not_dry_run_returns_failure, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_run_command_not_dry_run_no_log_file, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_dry_run_returns_zero, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_dry_run_creates_log_file, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_dry_run_logs_command, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_dry_run_logs_multiple_commands, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_not_dry_run_executes_command, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_not_dry_run_returns_failure, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_run_install_command_not_dry_run_no_log_file, setup, teardown),
         cmocka_unit_test_setup_teardown(test_close_dry_run_log_safe_when_not_open, setup, teardown),
         cmocka_unit_test_setup_teardown(test_close_dry_run_log_flushes_content, setup, teardown),
         cmocka_unit_test_setup_teardown(test_shell_escape_simple_string, setup, teardown),

@@ -1,59 +1,74 @@
+# ---
+# Common
+# ---
+
 CC = clang
 CFLAGS = -Wall -Wextra -g -MMD -MP
-LIBS = -lncurses
 
-# Build Configuration
+INTERNAL_LIBS = -L/usr/local/lib -l:limeos-common-lib.a
+EXTERNAL_LIBS = -lncurses -ldl
+LIBS = $(INTERNAL_LIBS) $(EXTERNAL_LIBS)
 
-SRCDIR = src
-OBJDIR = obj
-BINDIR = bin
+# ---
+# Build
+# ---
 
-TARGET = $(BINDIR)/limeos-installation-wizard
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
 
-SOURCES = $(shell find $(SRCDIR) -name '*.c')
-OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+TARGET = $(BIN_DIR)/limeos-installation-wizard
 
-INCLUDES = $(shell find $(SRCDIR) -type d -exec printf "-I{} " \;)
+SOURCES = $(shell find $(SRC_DIR) -name '*.c')
+OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEPS = $(OBJECTS:.o=.d)
+-include $(DEPS)
+
+INCLUDES = $(shell find $(SRC_DIR) -type d -exec printf "-I{} " \;)
 CFLAGS += $(INCLUDES)
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@mkdir -p $(BINDIR)
+	@mkdir -p $(BIN_DIR)
 	$(CC) $(OBJECTS) -o $@ $(LIBS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJDIR) $(BINDIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-# Tests Configuration
+# ---
+# Tests
+# ---
 
-TESTDIR = tests/unit
-TESTOBJDIR = obj/tests
-TESTBINDIR = bin/tests
-TESTSRCOBJDIR = obj/tests-src
+TEST_DIR = tests/unit
+TEST_OBJ_DIR = obj/tests
+TEST_BIN_DIR = bin/tests
+TEST_SRC_OBJ_DIR = obj/tests-src
 
-TEST_SOURCES = $(shell find $(TESTDIR) -name '*.c')
-TEST_OBJS = $(TEST_SOURCES:$(TESTDIR)/%.c=$(TESTOBJDIR)/%.o)
-TEST_BINARIES = $(TEST_SOURCES:$(TESTDIR)/%.c=$(TESTBINDIR)/%)
-TEST_SRC_OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(TESTSRCOBJDIR)/%.o)
-TEST_SRC_OBJECTS_NO_MAIN = $(filter-out $(TESTSRCOBJDIR)/main.o,$(TEST_SRC_OBJECTS))
+TEST_SOURCES = $(shell find $(TEST_DIR) -name '*.c')
+TEST_OBJECTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_OBJ_DIR)/%.o)
+TEST_BINARIES = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_BIN_DIR)/%)
+TEST_SRC_OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(TEST_SRC_OBJ_DIR)/%.o)
+TEST_SRC_OBJECTS_NO_MAIN = $(filter-out $(TEST_SRC_OBJ_DIR)/main.o,$(TEST_SRC_OBJECTS))
+TEST_DEPS = $(TEST_OBJECTS:.o=.d) $(TEST_SRC_OBJECTS:.o=.d)
+-include $(TEST_DEPS)
 
-TEST_CFLAGS = -Wall -Wextra -g $(INCLUDES) -Itests -DTESTING
+TEST_CFLAGS = -Wall -Wextra -g -MMD -MP $(INCLUDES) -Itests -DTESTING
 TEST_LIBS = $(LIBS) -lcmocka
 
-$(TESTSRCOBJDIR)/%.o: $(SRCDIR)/%.c
+$(TEST_SRC_OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
-$(TESTOBJDIR)/%.o: $(TESTDIR)/%.c
+$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
-$(TESTBINDIR)/%: $(TESTOBJDIR)/%.o $(TEST_SRC_OBJECTS_NO_MAIN)
+$(TEST_BIN_DIR)/%: $(TEST_OBJ_DIR)/%.o $(TEST_SRC_OBJECTS_NO_MAIN)
 	@mkdir -p $(dir $@)
 	$(CC) $< $(TEST_SRC_OBJECTS_NO_MAIN) -o $@ $(TEST_LIBS)
 
@@ -61,7 +76,7 @@ test: $(TEST_BINARIES)
 	@failed=0; \
 	for t in $(TEST_BINARIES); do \
 		echo ""; \
-		echo "Running tests from \"$(notdir $(TESTDIR))/$${t#$(TESTBINDIR)/}\":"; \
+		echo "Running tests from \"$(notdir $(TEST_DIR))/$${t#$(TEST_BIN_DIR)/}\":"; \
 		echo ""; \
 		$$t || failed=1; \
 	done; \
@@ -74,9 +89,11 @@ test: $(TEST_BINARIES)
 	fi
 
 test-clean:
-	rm -rf $(TESTOBJDIR) $(TESTBINDIR) $(TESTSRCOBJDIR)
+	rm -rf $(TEST_OBJ_DIR) $(TEST_BIN_DIR) $(TEST_SRC_OBJ_DIR)
 
-# Special Directives
+# ---
+# Other
+# ---
 
-.PRECIOUS: $(TEST_OBJS) $(TEST_SRC_OBJECTS)
+.PRECIOUS: $(TEST_OBJECTS) $(TEST_SRC_OBJECTS)
 .PHONY: all clean test test-clean

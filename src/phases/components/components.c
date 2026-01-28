@@ -21,7 +21,7 @@ static int copy_component_binary(const Component *component)
         "cp %s/%s %s/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
         CONFIG_LIVE_COMPONENT_PATH, component->binary_name, CONFIG_TARGET_COMPONENT_PATH
     );
-    return run_command(cmd);
+    return run_install_command(cmd);
 }
 
 static int copy_component_binaries(void)
@@ -44,7 +44,7 @@ static int copy_component_binaries(void)
     }
 
     // Ensure target directory exists.
-    if (run_command("mkdir -p " CONFIG_TARGET_COMPONENT_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("mkdir -p " CONFIG_TARGET_COMPONENT_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
@@ -78,7 +78,7 @@ static int install_component_packages(const Component *component)
     }
 
     // Ensure target apt cache directory exists.
-    if (run_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/var/cache/apt/archives >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/var/cache/apt/archives >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
@@ -90,14 +90,14 @@ static int install_component_packages(const Component *component)
         "cp %s/*.deb " CONFIG_TARGET_MOUNT_POINT "/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
         deps_path
     );
-    if (run_command(cmd) != 0)
+    if (run_install_command(cmd) != 0)
     {
         return -2;
     }
 
     // Install packages using dpkg (run twice for dependency resolution).
-    run_command("chroot " CONFIG_TARGET_MOUNT_POINT " dpkg -i /var/cache/apt/archives/*.deb >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
-    if (run_command("chroot " CONFIG_TARGET_MOUNT_POINT " dpkg --configure -a >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    run_install_command("chroot " CONFIG_TARGET_MOUNT_POINT " dpkg -i /var/cache/apt/archives/*.deb >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
+    if (run_install_command("chroot " CONFIG_TARGET_MOUNT_POINT " dpkg --configure -a >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }
@@ -138,7 +138,7 @@ static int find_x11_startup_component(void)
 static int write_xinitrc(const Component *component)
 {
     // Ensure X11 xinit directory exists.
-    if (run_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/etc/X11/xinit >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/etc/X11/xinit >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
@@ -151,19 +151,20 @@ static int write_xinitrc(const Component *component)
         component->binary_name
     );
 
+    // Write to target xinitrc path.
     char cmd[1024];
     snprintf(
         cmd, sizeof(cmd),
         "cat > " CONFIG_TARGET_XINITRC_PATH " << 'EOF'\n%sEOF",
         xinitrc_content
     );
-    if (run_command(cmd) != 0)
+    if (run_install_command(cmd) != 0)
     {
         return -2;
     }
 
     // Make xinitrc executable.
-    if (run_command("chmod +x " CONFIG_TARGET_XINITRC_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("chmod +x " CONFIG_TARGET_XINITRC_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }
@@ -174,7 +175,7 @@ static int write_xinitrc(const Component *component)
 static int write_xsession(const Component *component)
 {
     // Ensure /etc/skel exists.
-    if (run_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/etc/skel >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("mkdir -p " CONFIG_TARGET_MOUNT_POINT "/etc/skel >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -1;
     }
@@ -193,13 +194,13 @@ static int write_xsession(const Component *component)
         "cat > " CONFIG_TARGET_XSESSION_PATH " << 'EOF'\n%sEOF",
         xsession_content
     );
-    if (run_command(cmd) != 0)
+    if (run_install_command(cmd) != 0)
     {
         return -2;
     }
 
     // Make .xsession executable.
-    if (run_command("chmod +x " CONFIG_TARGET_XSESSION_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
+    if (run_install_command("chmod +x " CONFIG_TARGET_XSESSION_PATH " >>" CONFIG_INSTALL_LOG_PATH " 2>&1") != 0)
     {
         return -3;
     }

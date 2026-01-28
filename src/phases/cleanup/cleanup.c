@@ -10,24 +10,22 @@ int cleanup_mounts(void)
 {
     int errors = 0;
 
-    // Unmount in reverse order of mounting.
-
-    // Unmount chroot bind mounts.
-    if (run_command("umount /mnt/sys >/dev/null 2>&1") != 0)
+    // Unmount chroot bind mounts in reverse order of mounting.
+    if (run_install_command("umount /mnt/sys >/dev/null 2>&1") != 0)
     {
         errors++;
     }
-    if (run_command("umount /mnt/proc >/dev/null 2>&1") != 0)
+    if (run_install_command("umount /mnt/proc >/dev/null 2>&1") != 0)
     {
         errors++;
     }
-    if (run_command("umount /mnt/dev >/dev/null 2>&1") != 0)
+    if (run_install_command("umount /mnt/dev >/dev/null 2>&1") != 0)
     {
         errors++;
     }
 
     // Unmount EFI partition (not an error if it wasn't mounted).
-    run_command("umount /mnt/boot/efi >/dev/null 2>&1");
+    run_install_command("umount /mnt/boot/efi >/dev/null 2>&1");
 
     // Disable swap partitions and unmount other partitions.
     Store *store = get_store();
@@ -47,7 +45,7 @@ int cleanup_mounts(void)
             {
                 char cmd[256];
                 snprintf(cmd, sizeof(cmd), "swapoff %s >/dev/null 2>&1", escaped_device);
-                run_command(cmd);
+                run_install_command(cmd);
             }
         }
         else if (
@@ -65,13 +63,13 @@ int cleanup_mounts(void)
             {
                 char cmd[256];
                 snprintf(cmd, sizeof(cmd), "umount %s >/dev/null 2>&1", escaped_mount);
-                run_command(cmd);
+                run_install_command(cmd);
             }
         }
     }
 
     // Unmount root partition last.
-    if (run_command("umount /mnt >/dev/null 2>&1") != 0)
+    if (run_install_command("umount /mnt >/dev/null 2>&1") != 0)
     {
         errors++;
     }

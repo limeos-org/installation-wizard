@@ -22,7 +22,7 @@ static int set_hostname(const char *hostname)
         escaped_hostname
     );
 
-    return run_command(command) == 0 ? 0 : -2;
+    return run_install_command(command) == 0 ? 0 : -2;
 }
 
 static int create_user(const User *user)
@@ -42,7 +42,7 @@ static int create_user(const User *user)
         escaped_username
     );
 
-    return run_command(command) == 0 ? 0 : -2;
+    return run_install_command(command) == 0 ? 0 : -2;
 }
 
 static int set_password(const User *user)
@@ -69,7 +69,7 @@ static int set_password(const User *user)
         escaped_username, escaped_password
     );
 
-    return run_command(command) == 0 ? 0 : -3;
+    return run_install_command(command) == 0 ? 0 : -3;
 }
 
 static int add_to_admin_group(const User *user)
@@ -89,7 +89,7 @@ static int add_to_admin_group(const User *user)
         escaped_username
     );
 
-    return run_command(command) == 0 ? 0 : -2;
+    return run_install_command(command) == 0 ? 0 : -2;
 }
 
 int configure_users(void)

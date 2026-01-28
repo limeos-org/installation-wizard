@@ -34,7 +34,6 @@ typedef enum {
 
 BootValidationError validate_uefi_boot(Store *store);
 BootValidationError validate_bios_gpt_boot(Store *store);
-BootValidationError validate_bios_mbr_boot(Store *store);
 BootValidationError validate_optional_boot(Store *store);
 BootValidationError validate_boot_config(
     Store *store, FirmwareType firmware, DiskLabel disk_label
