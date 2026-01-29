@@ -21,6 +21,7 @@ section listed first will take precedence.
 - [Building the installation wizard](#building-the-installation-wizard)
 - [Running the installation wizard](#running-the-installation-wizard)
 - [Testing the installation wizard](#testing-the-installation-wizard)
+- [Understanding the installation flow](#understanding-the-installation-flow)
 
 **General Contributing Guidelines**
 
@@ -134,6 +135,49 @@ make test
 
 Finally, verify that all tests pass. If any tests fail, review the output to
 identify the failing test and investigate the cause before submitting changes.
+
+### Understanding the installation flow
+
+This subsection explains the phases the installation wizard executes to install
+LimeOS onto a target disk.
+
+The installation process consists of seven sequential phases:
+
+```
+┌──────────────┐
+│  Partitions  │  Create GPT table, format, mount filesystems.
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ System files │  Extract root file system tarball to /mnt.
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│    Fstab     │  Generate /etc/fstab for mounting partitions at boot.
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  Bootloader  │  Install and configure GRUB (UEFI or BIOS).
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│    Locale    │  Configure system locale.
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  Components  │  Install LimeOS components.
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│    Users     │  Create user accounts and set hostname.
+└──────────────┘
+```
 
 &nbsp;
 
