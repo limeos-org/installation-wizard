@@ -62,8 +62,13 @@ int generate_fstab(void)
     }
 
     // Write header comment.
-    fprintf(fstab, "# /etc/fstab: static file system information.\n");
-    fprintf(fstab, "# <device>  <mount>  <type>  <options>  <dump>  <pass>\n\n");
+    if (fprintf(fstab, "# /etc/fstab: static file system information.\n") < 0 ||
+        fprintf(fstab, "# <device>  <mount>  <type>  <options>  <dump>  <pass>\n\n") < 0)
+    {
+        write_install_log("Failed to write fstab header");
+        fclose(fstab);
+        return -2;
+    }
 
     // Generate entry for each partition.
     for (int i = 0; i < store->partition_count; i++)
@@ -79,8 +84,8 @@ int generate_fstab(void)
         get_partition_device(disk, i + 1, device, sizeof(device));
 
         // Determine mount point (swap uses "none").
-        const char *mount = (partition->filesystem == FS_SWAP) 
-            ? "none" 
+        const char *mount = (partition->filesystem == FS_SWAP)
+            ? "none"
             : partition->mount_point;
 
         // Skip if no valid mount point.
@@ -92,8 +97,21 @@ int generate_fstab(void)
 
         // Write fstab entry.
         write_install_log("Fstab entry: %s -> %s (%s)", device, mount, fs_type);
-        fprintf(fstab, "%s\t%s\t%s\t%s\t0\t%d\n",
-            device, mount, fs_type, options, passno);
+        if (fprintf(fstab, "%s\t%s\t%s\t%s\t0\t%d\n",
+            device, mount, fs_type, options, passno) < 0)
+        {
+            write_install_log("Failed to write fstab entry for %s", device);
+            fclose(fstab);
+            return -3;
+        }
+    }
+
+    // Ensure all data is flushed before closing.
+    if (fflush(fstab) != 0)
+    {
+        write_install_log("Failed to flush fstab");
+        fclose(fstab);
+        return -4;
     }
 
     fclose(fstab);

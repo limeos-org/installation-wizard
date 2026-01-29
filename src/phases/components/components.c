@@ -15,7 +15,7 @@ static int component_exists(const Component *component)
 
 static int copy_component_binary(const Component *component)
 {
-    char cmd[512];
+    char cmd[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         cmd, sizeof(cmd),
         "cp %s/%s %s/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
@@ -84,7 +84,7 @@ static int install_component_packages(const Component *component)
     }
 
     // Copy bundled .deb packages to target apt cache.
-    char cmd[512];
+    char cmd[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         cmd, sizeof(cmd),
         "cp %s/*.deb " CONFIG_TARGET_MOUNT_POINT "/var/cache/apt/archives/ >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
@@ -152,7 +152,7 @@ static int write_xinitrc(const Component *component)
     );
 
     // Write to target xinitrc path.
-    char cmd[1024];
+    char cmd[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         cmd, sizeof(cmd),
         "cat > " CONFIG_TARGET_XINITRC_PATH " << 'EOF'\n%sEOF",
@@ -188,7 +188,7 @@ static int write_xsession(const Component *component)
         component->binary_name
     );
 
-    char cmd[1024];
+    char cmd[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         cmd, sizeof(cmd),
         "cat > " CONFIG_TARGET_XSESSION_PATH " << 'EOF'\n%sEOF",

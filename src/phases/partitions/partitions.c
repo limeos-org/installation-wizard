@@ -8,14 +8,14 @@
 static int create_gpt_table(const char *disk)
 {
     // Escape disk path for shell command.
-    char escaped_disk[256];
+    char escaped_disk[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
     {
         return -1;
     }
 
     // Build and run parted command to create GPT label.
-    char command[512];
+    char command[COMMON_MAX_COMMAND_LENGTH];
     snprintf(command, sizeof(command), "parted -s %s mklabel gpt >>" CONFIG_INSTALL_LOG_PATH " 2>&1", escaped_disk);
 
     return run_install_command(command) == 0 ? 0 : -2;
@@ -24,7 +24,7 @@ static int create_gpt_table(const char *disk)
 static int create_partition_entries(const char *disk, Store *store)
 {
     // Escape disk path for shell commands.
-    char escaped_disk[256];
+    char escaped_disk[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
     {
         return -1;
@@ -44,7 +44,7 @@ static int create_partition_entries(const char *disk, Store *store)
             i + 1, size_mb, start_mb, end_mb, partition->mount_point);
 
         // Create partition with calculated boundaries.
-        char command[512];
+        char command[COMMON_MAX_COMMAND_LENGTH];
         snprintf(
             command, sizeof(command),
             "parted -s %s mkpart %s %lluMiB %lluMiB >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
@@ -118,14 +118,14 @@ static int format_partitions(const char *disk, Store *store)
         get_partition_device(disk, i + 1, partition_device, sizeof(partition_device));
 
         // Escape device path for shell command.
-        char escaped_device[256];
+        char escaped_device[COMMON_MAX_QUOTED_LENGTH];
         if (common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0)
         {
             return -1;
         }
 
         // Determine formatting command based on filesystem type.
-        char command[512];
+        char command[COMMON_MAX_COMMAND_LENGTH];
         const char *fs_name = NULL;
         if (partition->filesystem == FS_EXT4)
         {
@@ -180,14 +180,14 @@ static int mount_root_partition(const char *disk, int root_index)
     get_partition_device(disk, root_index + 1, root_device, sizeof(root_device));
 
     // Escape device path for shell command.
-    char escaped_device[256];
+    char escaped_device[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(root_device, escaped_device, sizeof(escaped_device)) != 0)
     {
         return -1;
     }
 
     // Build and execute mount command.
-    char command[512];
+    char command[COMMON_MAX_COMMAND_LENGTH];
     snprintf(command, sizeof(command), "mount %s /mnt >>" CONFIG_INSTALL_LOG_PATH " 2>&1", escaped_device);
 
     return run_install_command(command) == 0 ? 0 : -2;
@@ -208,7 +208,7 @@ static int mount_remaining_partitions(const char *disk, Store *store)
             get_partition_device(disk, i + 1, partition_device, sizeof(partition_device));
 
             // Escape device path for shell command.
-            char escaped_device[256];
+            char escaped_device[COMMON_MAX_QUOTED_LENGTH];
             if (common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0)
             {
                 write_install_log("Warning: failed to escape device path %s", partition_device);
@@ -217,7 +217,7 @@ static int mount_remaining_partitions(const char *disk, Store *store)
 
             // Enable swap.
             write_install_log("Enabling swap on %s", partition_device);
-            char command[512];
+            char command[COMMON_MAX_COMMAND_LENGTH];
             snprintf(command, sizeof(command), "swapon %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1", escaped_device);
             if (run_install_command(command) != 0)
             {
@@ -235,8 +235,8 @@ static int mount_remaining_partitions(const char *disk, Store *store)
             snprintf(mount_path, sizeof(mount_path), "/mnt%s", partition->mount_point);
             
             // Escape paths for shell command.
-            char escaped_mount[512];
-            char escaped_device[256];
+            char escaped_mount[COMMON_MAX_QUOTED_LENGTH];
+            char escaped_device[COMMON_MAX_QUOTED_LENGTH];
             if (
                 common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0 ||
                 common.shell_escape(mount_path, escaped_mount, sizeof(escaped_mount)) != 0)
@@ -247,7 +247,7 @@ static int mount_remaining_partitions(const char *disk, Store *store)
 
             // Create mount point and mount partition.
             write_install_log("Mounting %s at %s", partition_device, mount_path);
-            char command[512];
+            char command[COMMON_MAX_COMMAND_LENGTH];
             snprintf(
                 command, sizeof(command),
                 "mkdir -p %s && mount %s %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",

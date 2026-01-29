@@ -40,10 +40,10 @@ int cleanup_mounts(void)
             get_partition_device(store->disk, i + 1, partition_device, sizeof(partition_device));
 
             // Disable swap.
-            char escaped_device[256];
+            char escaped_device[COMMON_MAX_QUOTED_LENGTH];
             if (common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) == 0)
             {
-                char cmd[256];
+                char cmd[COMMON_MAX_COMMAND_LENGTH];
                 snprintf(cmd, sizeof(cmd), "swapoff %s >/dev/null 2>&1", escaped_device);
                 run_install_command(cmd);
             }
@@ -51,17 +51,16 @@ int cleanup_mounts(void)
         else if (
             strcmp(partition->mount_point, "/") != 0 &&
             partition->mount_point[0] == '/'
-        )
-        {
+        ) {
             // Construct full mount path.
             char mount_path[256];
             snprintf(mount_path, sizeof(mount_path), "/mnt%s", partition->mount_point);
             
             // Escape mount path and run unmount command.
-            char escaped_mount[512];
+            char escaped_mount[COMMON_MAX_QUOTED_LENGTH];
             if (common.shell_escape(mount_path, escaped_mount, sizeof(escaped_mount)) == 0)
             {
-                char cmd[256];
+                char cmd[COMMON_MAX_COMMAND_LENGTH];
                 snprintf(cmd, sizeof(cmd), "umount %s >/dev/null 2>&1", escaped_mount);
                 run_install_command(cmd);
             }

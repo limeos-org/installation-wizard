@@ -147,7 +147,6 @@ void render_table(
     for (int visible_index = 0; visible_index < visible_count; visible_index++)
     {
         int row_index = scroll_offset + visible_index;
-        int row_color = (row_index % 2 == 0) ? COLOR_PAIR_ROW : COLOR_PAIR_ROW;
         int is_selected_row = (row_index == selected);
 
         // Apply row styling: reverse for selected, alternating colors otherwise.
@@ -157,7 +156,7 @@ void render_table(
         }
         else
         {
-            wattron(window, COLOR_PAIR(row_color));
+            wattron(window, COLOR_PAIR(COLOR_PAIR_ROW));
         }
 
         // Render either row data or empty row.
@@ -204,14 +203,14 @@ void render_table(
             mvwprintw(window, y + 1 + visible_index, x, "%*s", table_width, "");
         }
 
-        // Disable row styling after rendering.
+        // Clear row styling after rendering.
         if (is_selected_row)
         {
             wattroff(window, A_REVERSE);
         }
         else
         {
-            wattroff(window, COLOR_PAIR(row_color));
+            wattroff(window, COLOR_PAIR(COLOR_PAIR_ROW));
         }
     }
 

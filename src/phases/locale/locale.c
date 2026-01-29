@@ -53,7 +53,7 @@ int configure_locale(void)
     
     // Enable the selected locale in /etc/locale.gen.
     // This uncomments the line matching the locale.
-    char cmd[512];
+    char cmd[COMMON_MAX_COMMAND_LENGTH];
     snprintf(cmd, sizeof(cmd),
         "sed -i '/^# %s/s/^# //' /mnt/etc/locale.gen >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
         store->locale);

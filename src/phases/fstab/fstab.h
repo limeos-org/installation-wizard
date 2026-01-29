@@ -7,6 +7,9 @@
  * root, swap, and any additional mount points.
  *
  * @return - `0` - Success.
- * @return - `-1` - Failed to create fstab file.
+ * @return - `-1` - Failed to open fstab file.
+ * @return - `-2` - Failed to write fstab header.
+ * @return - `-3` - Failed to write fstab entry.
+ * @return - `-4` - Failed to flush fstab.
  */
 int generate_fstab(void);

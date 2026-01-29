@@ -78,61 +78,62 @@ void render_partition_table(
     // Render partition rows.
     for (int i = 0; i < MAX_VISIBLE_PARTITIONS; i++)
     {
-        int part_index = scroll_offset + i;
+        // Calculate the actual partition index based on scroll offset.
+        int partition_index = scroll_offset + i;
 
-        // Apply alternating row background color.
-        int row_color = (part_index % 2 == 0) ? COLOR_PAIR_ROW : COLOR_PAIR_ROW;
-        wattron(modal, COLOR_PAIR(row_color));
+        // Apply row background color.
+        wattron(modal, COLOR_PAIR(COLOR_PAIR_ROW));
 
-        if (part_index < store->partition_count)
+        // Render empty row for unused table slots.
+        if (partition_index >= store->partition_count)
         {
-            // Format partition data for display.
-            Partition *p = &store->partitions[part_index];
-            format_disk_size(p->size_bytes, size_string, sizeof(size_string));
-
-            // Build flags string from partition flags.
-            char flags[24] = "";
-            if (p->flag_boot) strcat(flags, "boot ");
-            if (p->flag_esp) strcat(flags, "esp ");
-            if (p->flag_bios_grub) strcat(flags, "bios_grub");
-
-            // Use "[swap]" label for swap partitions.
-            const char *mount = (p->filesystem == FS_SWAP)
-                ? "[swap]" : p->mount_point;
-
-            // Highlight selected partition in selection mode.
-            if (in_partition_select_mode && part_index == selected_partition)
-            {
-                wattron(modal, A_REVERSE);
-            }
-
-            // Render the partition row.
-            char row[64];
-            snprintf(
-                row, sizeof(row),
-                " %-*d %-*s %-*s %-*s %-*s %-*s",
-                COL_WIDTH_NUM, part_index + 1,
-                COL_WIDTH_SIZE, size_string,
-                COL_WIDTH_MOUNT, mount,
-                COL_WIDTH_FS, convert_fs_to_string(p->filesystem),
-                COL_WIDTH_TYPE, convert_type_to_string(p->type),
-                COL_WIDTH_FLAGS, flags
-            );
-            mvwprintw(modal, 7 + i, 3, "%-*s", table_width, row);
-
-            // Remove highlight after rendering.
-            if (in_partition_select_mode && part_index == selected_partition)
-            {
-                wattroff(modal, A_REVERSE);
-            }
-        }
-        else
-        {
-            // Render empty row for unused table slots.
             mvwprintw(modal, 7 + i, 3, "%-*s", table_width, "");
+            wattroff(modal, COLOR_PAIR(COLOR_PAIR_ROW));
+            continue;
         }
 
-        wattroff(modal, COLOR_PAIR(row_color));
+        // Format partition data for display.
+        Partition *p = &store->partitions[partition_index];
+        format_disk_size(p->size_bytes, size_string, sizeof(size_string));
+
+        // Build flags string from partition flags.
+        char flags[24] = "";
+        if (p->flag_boot) strcat(flags, "boot ");
+        if (p->flag_esp) strcat(flags, "esp ");
+        if (p->flag_bios_grub) strcat(flags, "bios_grub");
+
+        // Use "[swap]" label for swap partitions.
+        const char *mount = (p->filesystem == FS_SWAP)
+            ? "[swap]" : p->mount_point;
+
+        // Highlight selected partition in selection mode.
+        if (in_partition_select_mode && partition_index == selected_partition)
+        {
+            wattron(modal, A_REVERSE);
+        }
+
+        // Render the partition row.
+        char row[64];
+        snprintf(
+            row, sizeof(row),
+            " %-*d %-*s %-*s %-*s %-*s %-*s",
+            COL_WIDTH_NUM, partition_index + 1,
+            COL_WIDTH_SIZE, size_string,
+            COL_WIDTH_MOUNT, mount,
+            COL_WIDTH_FS, convert_fs_to_string(p->filesystem),
+            COL_WIDTH_TYPE, convert_type_to_string(p->type),
+            COL_WIDTH_FLAGS, flags
+        );
+        mvwprintw(modal, 7 + i, 3, "%-*s", table_width, row);
+
+        // Remove highlight after rendering.
+        if (in_partition_select_mode && partition_index == selected_partition)
+        {
+            wattroff(modal, A_REVERSE);
+        }
+
+        // Remove row background color.
+        wattroff(modal, COLOR_PAIR(COLOR_PAIR_ROW));
     }
 
     // Draw scrollbar if there are more partitions than visible rows.

@@ -13,7 +13,8 @@
  * @param command The shell command to execute.
  *
  * @return - `0` - Success (or dry run mode).
- * @return - `non-zero` - The return value of system() on failure.
+ * @return - `-1` - Command terminated abnormally.
+ * @return - `-2` - Failed to wait for command.
  */
 int run_install_command(const char *command);
 

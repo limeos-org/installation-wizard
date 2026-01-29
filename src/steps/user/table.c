@@ -39,11 +39,8 @@ void render_user_table(
     {
         int user_index = scroll_offset + i;
 
-        // Apply alternating row background color.
-        int row_color = (user_index % 2 == 0)
-            ? COLOR_PAIR_ROW
-            : COLOR_PAIR_ROW;
-        wattron(modal, COLOR_PAIR(row_color));
+        // Apply row background color.
+        wattron(modal, COLOR_PAIR(COLOR_PAIR_ROW));
 
         if (user_index < store->user_count)
         {
@@ -103,7 +100,8 @@ void render_user_table(
             mvwprintw(modal, 7 + i, 3, "%-*s", table_width, "");
         }
 
-        wattroff(modal, COLOR_PAIR(row_color));
+        // Clear row background color.
+        wattroff(modal, COLOR_PAIR(COLOR_PAIR_ROW));
     }
 
     // Draw scrollbar if there are more users than visible rows.

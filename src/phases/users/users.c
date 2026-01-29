@@ -8,14 +8,14 @@
 static int set_hostname(const char *hostname)
 {
     // Escape hostname for shell safety.
-    char escaped_hostname[256];
+    char escaped_hostname[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(hostname, escaped_hostname, sizeof(escaped_hostname)) != 0)
     {
         return -1;
     }
 
     // Write hostname to target system.
-    char command[512];
+    char command[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         command, sizeof(command),
         "echo %s > /mnt/etc/hostname",
@@ -28,14 +28,14 @@ static int set_hostname(const char *hostname)
 static int create_user(const User *user)
 {
     // Escape username for shell safety.
-    char escaped_username[256];
+    char escaped_username[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
     {
         return -1;
     }
 
     // Create user with home directory and bash shell.
-    char command[512];
+    char command[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         command, sizeof(command),
         "chroot /mnt useradd -m -s /bin/bash %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
@@ -48,21 +48,21 @@ static int create_user(const User *user)
 static int set_password(const User *user)
 {
     // Escape username for shell safety.
-    char escaped_username[256];
+    char escaped_username[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
     {
         return -1;
     }
 
     // Escape password for shell safety.
-    char escaped_password[512];
+    char escaped_password[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(user->password, escaped_password, sizeof(escaped_password)) != 0)
     {
         return -2;
     }
 
     // Set password using chpasswd.
-    char command[1024];
+    char command[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         command, sizeof(command),
         "chroot /mnt sh -c 'echo %s:%s | chpasswd' >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
@@ -75,14 +75,14 @@ static int set_password(const User *user)
 static int add_to_admin_group(const User *user)
 {
     // Escape username for shell safety.
-    char escaped_username[256];
+    char escaped_username[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
     {
         return -1;
     }
 
     // Add user to sudo group.
-    char command[512];
+    char command[COMMON_MAX_COMMAND_LENGTH];
     snprintf(
         command, sizeof(command),
         "chroot /mnt usermod -aG sudo %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
@@ -150,5 +150,6 @@ int configure_users(void)
     }
 
     write_install_log("User configuration complete");
+    
     return 0;
 }

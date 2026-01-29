@@ -11,14 +11,14 @@ static int verify_chroot_works(void)
     const char *marker = "/mnt/tmp/.chroot_verify";
 
     // Escape the marker path for shell command.
-    char escaped_marker[256];
+    char escaped_marker[COMMON_MAX_QUOTED_LENGTH];
     if (common.shell_escape(marker, escaped_marker, sizeof(escaped_marker)) != 0)
     {
         return -1;
     }
 
     // Create marker file inside chroot /mnt.
-    char cmd[256];
+    char cmd[COMMON_MAX_COMMAND_LENGTH];
     snprintf(cmd, sizeof(cmd), "echo 'limeos' > %s", escaped_marker);
     if (run_install_command(cmd) != 0)
     {
@@ -132,10 +132,11 @@ static int install_grub_packages(int is_uefi)
 
     // Install GRUB packages. Run dpkg twice: first pass unpacks all packages,
     // second pass configures them in dependency order.
-    // Note: Inner sh -c ensures the glob expands inside the chroot, not on the host.
-    // Use --no-triggers to prevent dpkg from running initramfs-tools triggers,
-    // which would regenerate initramfs in the chroot (where firmware detection
-    // fails). The pre-built initramfs already has GPU firmware/drivers embedded.
+    // Note: Inner sh -c ensures the glob expands inside the chroot, not on the
+    // host. Use `--no-triggers` to prevent dpkg from running initramfs-tools 
+    // triggers, which would regenerate initramfs in the chroot (where firmware 
+    // detection fails). The pre-built initramfs already has GPU 
+    // firmware/drivers embedded.
     run_install_command("chroot /mnt sh -c 'dpkg -i --no-triggers /var/cache/apt/archives/*.deb' >>" CONFIG_INSTALL_LOG_PATH " 2>&1");
 
     // Configure installed packages.
@@ -174,14 +175,14 @@ static int run_grub_install(const char *disk, int is_uefi)
     else
     {
         // Escape disk path for shell command.
-        char escaped_disk[256];
+        char escaped_disk[COMMON_MAX_QUOTED_LENGTH];
         if (common.shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
         {
             return -2;
         }
 
         // Install GRUB to disk MBR for BIOS boot.
-        char cmd[512];
+        char cmd[COMMON_MAX_COMMAND_LENGTH];
         snprintf(cmd, sizeof(cmd),
             "chroot /mnt /usr/sbin/grub-install %s >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
             escaped_disk);
@@ -217,6 +218,7 @@ static int setup_grub_bios(const char *disk)
     if (install_grub_packages(0) != 0)
     {
         write_install_log("Failed to install GRUB packages");
+        unmount_chroot_system_dirs();
         return -3;
     }
 
@@ -225,6 +227,7 @@ static int setup_grub_bios(const char *disk)
     if (run_grub_install(disk, 0) != 0)
     {
         write_install_log("grub-install failed");
+        unmount_chroot_system_dirs();
         return -4;
     }
 
@@ -233,9 +236,12 @@ static int setup_grub_bios(const char *disk)
     if (run_update_grub() != 0)
     {
         write_install_log("update-grub failed");
+        unmount_chroot_system_dirs();
         return -5;
     }
 
+    unmount_chroot_system_dirs();
+    
     return 0;
 }
 
@@ -259,6 +265,7 @@ static int setup_grub_uefi(const char *disk)
     if (install_grub_packages(1) != 0)
     {
         write_install_log("Failed to install GRUB packages");
+        unmount_chroot_system_dirs();
         return -4;
     }
 
@@ -267,6 +274,7 @@ static int setup_grub_uefi(const char *disk)
     if (run_grub_install(disk, 1) != 0)
     {
         write_install_log("grub-install failed");
+        unmount_chroot_system_dirs();
         return -5;
     }
     write_install_log("Created fallback boot path at /boot/efi/EFI/BOOT/BOOTX64.EFI");
@@ -276,8 +284,11 @@ static int setup_grub_uefi(const char *disk)
     if (run_update_grub() != 0)
     {
         write_install_log("update-grub failed");
+        unmount_chroot_system_dirs();
         return -6;
     }
+
+    unmount_chroot_system_dirs();
 
     return 0;
 }
@@ -291,6 +302,7 @@ int setup_bootloader(void)
     int is_uefi = detect_uefi_mode();
     write_install_log("Boot mode: %s", is_uefi ? "UEFI" : "BIOS");
 
+    // Install and configure GRUB bootloader.
     int result;
     if (is_uefi)
     {
@@ -302,7 +314,6 @@ int setup_bootloader(void)
         write_install_log("Using GRUB for BIOS");
         result = setup_grub_bios(disk);
     }
-
     if (result != 0)
     {
         return result;
