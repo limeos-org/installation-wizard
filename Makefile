@@ -5,8 +5,8 @@
 CC = clang
 CFLAGS = -Wall -Wextra -g -MMD -MP
 
-INTERNAL_LIBS = -L/usr/local/lib -l:limeos-common-lib.a
-EXTERNAL_LIBS = -lncurses -ldl
+INTERNAL_LIBS = $(shell pkg-config --libs limeos-common-lib)
+EXTERNAL_LIBS = -lncurses
 LIBS = $(INTERNAL_LIBS) $(EXTERNAL_LIBS)
 
 # ---

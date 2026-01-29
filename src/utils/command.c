@@ -38,7 +38,7 @@ int run_install_command(const char *command)
     // If no tick callback, delegate directly to core-lib.
     if (!tick_callback)
     {
-        return run_command(command);
+        return common.run_command(command);
     }
 
     // Fork and exec to allow periodic updates during execution.
@@ -46,7 +46,7 @@ int run_install_command(const char *command)
     if (pid < 0)
     {
         // Fork failed, fall back to core-lib.
-        return run_command(command);
+        return common.run_command(command);
     }
 
     if (pid == 0)

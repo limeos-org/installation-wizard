@@ -9,7 +9,7 @@ static int create_gpt_table(const char *disk)
 {
     // Escape disk path for shell command.
     char escaped_disk[256];
-    if (shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
+    if (common.shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
     {
         return -1;
     }
@@ -25,7 +25,7 @@ static int create_partition_entries(const char *disk, Store *store)
 {
     // Escape disk path for shell commands.
     char escaped_disk[256];
-    if (shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
+    if (common.shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
     {
         return -1;
     }
@@ -119,7 +119,7 @@ static int format_partitions(const char *disk, Store *store)
 
         // Escape device path for shell command.
         char escaped_device[256];
-        if (shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0)
+        if (common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0)
         {
             return -1;
         }
@@ -181,7 +181,7 @@ static int mount_root_partition(const char *disk, int root_index)
 
     // Escape device path for shell command.
     char escaped_device[256];
-    if (shell_escape(root_device, escaped_device, sizeof(escaped_device)) != 0)
+    if (common.shell_escape(root_device, escaped_device, sizeof(escaped_device)) != 0)
     {
         return -1;
     }
@@ -209,7 +209,7 @@ static int mount_remaining_partitions(const char *disk, Store *store)
 
             // Escape device path for shell command.
             char escaped_device[256];
-            if (shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0)
+            if (common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0)
             {
                 write_install_log("Warning: failed to escape device path %s", partition_device);
                 continue;
@@ -238,8 +238,8 @@ static int mount_remaining_partitions(const char *disk, Store *store)
             char escaped_mount[512];
             char escaped_device[256];
             if (
-                shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0 ||
-                shell_escape(mount_path, escaped_mount, sizeof(escaped_mount)) != 0)
+                common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) != 0 ||
+                common.shell_escape(mount_path, escaped_mount, sizeof(escaped_mount)) != 0)
             {
                 write_install_log("Warning: failed to escape paths for mount");
                 continue;

@@ -86,7 +86,7 @@ make
 sudo make install
 ```
 
-Then, from the root directory of the repository, build the project by running:
+Then, from the root directory of this repository, build the project by running:
 
 ```bash
 make

@@ -9,7 +9,7 @@ static int set_hostname(const char *hostname)
 {
     // Escape hostname for shell safety.
     char escaped_hostname[256];
-    if (shell_escape(hostname, escaped_hostname, sizeof(escaped_hostname)) != 0)
+    if (common.shell_escape(hostname, escaped_hostname, sizeof(escaped_hostname)) != 0)
     {
         return -1;
     }
@@ -29,7 +29,7 @@ static int create_user(const User *user)
 {
     // Escape username for shell safety.
     char escaped_username[256];
-    if (shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
+    if (common.shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
     {
         return -1;
     }
@@ -49,14 +49,14 @@ static int set_password(const User *user)
 {
     // Escape username for shell safety.
     char escaped_username[256];
-    if (shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
+    if (common.shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
     {
         return -1;
     }
 
     // Escape password for shell safety.
     char escaped_password[512];
-    if (shell_escape(user->password, escaped_password, sizeof(escaped_password)) != 0)
+    if (common.shell_escape(user->password, escaped_password, sizeof(escaped_password)) != 0)
     {
         return -2;
     }
@@ -76,7 +76,7 @@ static int add_to_admin_group(const User *user)
 {
     // Escape username for shell safety.
     char escaped_username[256];
-    if (shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
+    if (common.shell_escape(user->username, escaped_username, sizeof(escaped_username)) != 0)
     {
         return -1;
     }

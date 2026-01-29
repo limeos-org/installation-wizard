@@ -12,7 +12,7 @@ static int verify_chroot_works(void)
 
     // Escape the marker path for shell command.
     char escaped_marker[256];
-    if (shell_escape(marker, escaped_marker, sizeof(escaped_marker)) != 0)
+    if (common.shell_escape(marker, escaped_marker, sizeof(escaped_marker)) != 0)
     {
         return -1;
     }
@@ -175,7 +175,7 @@ static int run_grub_install(const char *disk, int is_uefi)
     {
         // Escape disk path for shell command.
         char escaped_disk[256];
-        if (shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
+        if (common.shell_escape(disk, escaped_disk, sizeof(escaped_disk)) != 0)
         {
             return -2;
         }

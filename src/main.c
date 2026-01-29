@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     const int library_count = sizeof(libraries) / sizeof(libraries[0]);
     for (int i = 0; i < library_count; i++)
     {
-        if (!is_library_available(libraries[i]))
+        if (!common.is_library_available(libraries[i]))
         {
             fprintf(stderr, "Missing library \"%s\".\n", libraries[i]);
             exit(EXIT_FAILURE);
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     const int command_count = sizeof(commands) / sizeof(commands[0]);
     for (int i = 0; i < command_count; i++)
     {
-        if (!is_command_available(commands[i]))
+        if (!common.is_command_available(commands[i]))
         {
             fprintf(stderr, "Missing command \"%s\".\n", commands[i]);
             exit(EXIT_FAILURE);

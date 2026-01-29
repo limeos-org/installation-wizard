@@ -41,7 +41,7 @@ int cleanup_mounts(void)
 
             // Disable swap.
             char escaped_device[256];
-            if (shell_escape(partition_device, escaped_device, sizeof(escaped_device)) == 0)
+            if (common.shell_escape(partition_device, escaped_device, sizeof(escaped_device)) == 0)
             {
                 char cmd[256];
                 snprintf(cmd, sizeof(cmd), "swapoff %s >/dev/null 2>&1", escaped_device);
@@ -59,7 +59,7 @@ int cleanup_mounts(void)
             
             // Escape mount path and run unmount command.
             char escaped_mount[512];
-            if (shell_escape(mount_path, escaped_mount, sizeof(escaped_mount)) == 0)
+            if (common.shell_escape(mount_path, escaped_mount, sizeof(escaped_mount)) == 0)
             {
                 char cmd[256];
                 snprintf(cmd, sizeof(cmd), "umount %s >/dev/null 2>&1", escaped_mount);
