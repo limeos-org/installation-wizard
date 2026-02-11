@@ -74,7 +74,7 @@ static void test_create_partitions_creates_gpt_label(void **state)
 
     // Need at least a root partition to succeed.
     store->partition_count = 1;
-    store->partitions[0].size_bytes = 1024ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 1ULL * 1000000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/", MAX_MOUNT_LEN);
@@ -101,7 +101,7 @@ static void test_create_partitions_single_partition(void **state)
 
     // Add a 1GB root partition.
     store->partition_count = 1;
-    store->partitions[0].size_bytes = 1024ULL * 1024 * 1024; // 1GB
+    store->partitions[0].size_bytes = 1ULL * 1000000000; // 1GB
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/", MAX_MOUNT_LEN);
@@ -117,8 +117,8 @@ static void test_create_partitions_single_partition(void **state)
     assert_true(count >= 4);
     // GPT label.
     assert_string_equal("parted -s '/dev/sda' mklabel gpt >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[0]);
-    // Create partition: starts at 1MiB, ends at 1025MiB (1 + 1024).
-    assert_string_equal("parted -s '/dev/sda' mkpart primary 1MiB 1025MiB >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[1]);
+    // Verify decimal conversion: 1,000,000,000 / 1,000,000 = 1000MB, not 954MiB.
+    assert_string_equal("parted -s '/dev/sda' mkpart primary 1MB 1001MB >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[1]);
     // Format as ext4.
     assert_string_equal("mkfs.ext4 -F '/dev/sda1' >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[2]);
     // Mount root.
@@ -136,12 +136,12 @@ static void test_create_partitions_multiple_partitions(void **state)
     // Add 512MB boot + 2GB root.
     store->partition_count = 2;
 
-    store->partitions[0].size_bytes = 512ULL * 1024 * 1024; // 512MB
+    store->partitions[0].size_bytes = 512ULL * 1000000; // 512MB
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/boot", MAX_MOUNT_LEN);
 
-    store->partitions[1].size_bytes = 2048ULL * 1024 * 1024; // 2GB
+    store->partitions[1].size_bytes = 2ULL * 1000000000; // 2GB
     store->partitions[1].type = PART_PRIMARY;
     store->partitions[1].filesystem = FS_EXT4;
     strncpy(store->partitions[1].mount_point, "/", MAX_MOUNT_LEN);
@@ -155,10 +155,10 @@ static void test_create_partitions_multiple_partitions(void **state)
     int count = read_dry_run_log(lines, 32);
 
     assert_true(count >= 6);
-    // Partition 1: 1MiB to 513MiB.
-    assert_string_equal("parted -s '/dev/sda' mkpart primary 1MiB 513MiB >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[1]);
-    // Partition 2: 513MiB to 2561MiB.
-    assert_string_equal("parted -s '/dev/sda' mkpart primary 513MiB 2561MiB >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[2]);
+    // Partition 1: 1MB to 513MB.
+    assert_string_equal("parted -s '/dev/sda' mkpart primary 1MB 513MB >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[1]);
+    // Partition 2: 513MB to 2513MB.
+    assert_string_equal("parted -s '/dev/sda' mkpart primary 513MB 2513MB >>" CONFIG_INSTALL_LOG_PATH " 2>&1", lines[2]);
 }
 
 /** Verifies create_partitions() sets boot flag when requested. */
@@ -170,7 +170,7 @@ static void test_create_partitions_sets_boot_flag(void **state)
     strncpy(store->disk, "/dev/sda", MAX_DISK_LEN);
 
     store->partition_count = 1;
-    store->partitions[0].size_bytes = 512ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 512ULL * 1000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     store->partitions[0].flag_boot = 1;
@@ -197,7 +197,7 @@ static void test_create_partitions_sets_esp_flag(void **state)
     strncpy(store->disk, "/dev/sda", MAX_DISK_LEN);
 
     store->partition_count = 1;
-    store->partitions[0].size_bytes = 512ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 512ULL * 1000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     store->partitions[0].flag_esp = 1;
@@ -226,14 +226,14 @@ static void test_create_partitions_sets_bios_grub_flag(void **state)
     store->partition_count = 2;
 
     // BIOS boot partition.
-    store->partitions[0].size_bytes = 1ULL * 1024 * 1024; // 1MB
+    store->partitions[0].size_bytes = 1ULL * 1000000; // 1MB
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_NONE;
     store->partitions[0].flag_bios_grub = 1;
     store->partitions[0].mount_point[0] = '\0';
 
     // Root partition.
-    store->partitions[1].size_bytes = 1024ULL * 1024 * 1024;
+    store->partitions[1].size_bytes = 1ULL * 1000000000;
     store->partitions[1].type = PART_PRIMARY;
     store->partitions[1].filesystem = FS_EXT4;
     strncpy(store->partitions[1].mount_point, "/", MAX_MOUNT_LEN);
@@ -261,13 +261,13 @@ static void test_create_partitions_formats_swap(void **state)
     store->partition_count = 2;
 
     // Root partition.
-    store->partitions[0].size_bytes = 1024ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 1ULL * 1000000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/", MAX_MOUNT_LEN);
 
     // Swap partition.
-    store->partitions[1].size_bytes = 512ULL * 1024 * 1024;
+    store->partitions[1].size_bytes = 512ULL * 1000000;
     store->partitions[1].type = PART_PRIMARY;
     store->partitions[1].filesystem = FS_SWAP;
     store->partitions[1].mount_point[0] = '\0';
@@ -296,14 +296,14 @@ static void test_create_partitions_formats_fat32(void **state)
     store->partition_count = 2;
 
     // EFI partition (FAT32).
-    store->partitions[0].size_bytes = 512ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 512ULL * 1000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_FAT32;
     store->partitions[0].flag_esp = 1;
     strncpy(store->partitions[0].mount_point, "/boot/efi", MAX_MOUNT_LEN);
 
     // Root partition.
-    store->partitions[1].size_bytes = 1024ULL * 1024 * 1024;
+    store->partitions[1].size_bytes = 1ULL * 1000000000;
     store->partitions[1].type = PART_PRIMARY;
     store->partitions[1].filesystem = FS_EXT4;
     strncpy(store->partitions[1].mount_point, "/", MAX_MOUNT_LEN);
@@ -329,7 +329,7 @@ static void test_create_partitions_nvme_naming(void **state)
     strncpy(store->disk, "/dev/nvme0n1", MAX_DISK_LEN);
 
     store->partition_count = 1;
-    store->partitions[0].size_bytes = 1024ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 1ULL * 1000000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/", MAX_MOUNT_LEN);
@@ -357,13 +357,13 @@ static void test_create_partitions_mounts_nonroot(void **state)
     store->partition_count = 2;
 
     // Root partition.
-    store->partitions[0].size_bytes = 1024ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 1ULL * 1000000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/", MAX_MOUNT_LEN);
 
     // Home partition.
-    store->partitions[1].size_bytes = 2048ULL * 1024 * 1024;
+    store->partitions[1].size_bytes = 2ULL * 1000000000;
     store->partitions[1].type = PART_PRIMARY;
     store->partitions[1].filesystem = FS_EXT4;
     strncpy(store->partitions[1].mount_point, "/home", MAX_MOUNT_LEN);
@@ -391,7 +391,7 @@ static void test_create_partitions_fails_without_root(void **state)
 
     // Only a boot partition, no root.
     store->partition_count = 1;
-    store->partitions[0].size_bytes = 512ULL * 1024 * 1024;
+    store->partitions[0].size_bytes = 512ULL * 1000000;
     store->partitions[0].type = PART_PRIMARY;
     store->partitions[0].filesystem = FS_EXT4;
     strncpy(store->partitions[0].mount_point, "/boot", MAX_MOUNT_LEN);

@@ -31,26 +31,27 @@ static int create_partition_entries(const char *disk, Store *store)
     }
 
     // Track partition start position in megabytes.
-    unsigned long long start_mb = 1;
+    unsigned long long start_megabytes = 1;
 
     // Iterate through each partition in the store.
     for (int i = 0; i < store->partition_count; i++)
     {
         Partition *partition = &store->partitions[i];
-        unsigned long long size_mb = partition->size_bytes / (1024 * 1024);
-        unsigned long long end_mb = start_mb + size_mb;
+        // Convert size from bytes to decimal megabytes (1 MB = 1,000,000 bytes).
+        unsigned long long size_megabytes = partition->size_bytes / (1000 * 1000);
+        unsigned long long end_megabytes = start_megabytes + size_megabytes;
 
         write_install_log("Creating partition %d: %lluMB (%lluMB - %lluMB), mount=%s",
-            i + 1, size_mb, start_mb, end_mb, partition->mount_point);
+            i + 1, size_megabytes, start_megabytes, end_megabytes, partition->mount_point);
 
         // Create partition with calculated boundaries.
         char command[COMMON_MAX_COMMAND_LENGTH];
         snprintf(
             command, sizeof(command),
-            "parted -s %s mkpart %s %lluMiB %lluMiB >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
+            "parted -s %s mkpart %s %lluMB %lluMB >>" CONFIG_INSTALL_LOG_PATH " 2>&1",
             escaped_disk,
             (partition->type == PART_PRIMARY) ? "primary" : "logical",
-            start_mb, end_mb
+            start_megabytes, end_megabytes
         );
         if (run_install_command(command) != 0)
         {
@@ -100,7 +101,7 @@ static int create_partition_entries(const char *disk, Store *store)
         }
 
         // Update start for next partition.
-        start_mb = end_mb;
+        start_megabytes = end_megabytes;
     }
 
     return 0;
