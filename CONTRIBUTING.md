@@ -65,8 +65,9 @@ distributions, run:
 
 ```bash
 sudo apt install \
-    gcc \
+    clang \
     make \
+    pkg-config \
     libncurses-dev \
     libcmocka-dev
 ```
